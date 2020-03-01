@@ -9,7 +9,13 @@ via `E_USER_DEPRECATED` and `trigger_error()`.
 ## Usage from a library perspective:
 
 ```php
-\Doctrine\Deprecations\Deprecation::trigger("doctrine/orm", "2.7", "https://link/to/deprecations-description", "message", ...$args);
+\Doctrine\Deprecations\Deprecation::trigger(
+    "doctrine/orm",
+    "2.7",
+    "https://link/to/deprecations-description",
+    "message",
+    ...$args
+);
 ```
 
 If variable arguments are provided at the end, they are used with `sprintf` on
