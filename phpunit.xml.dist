@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<phpunit bootstrap="vendor/autoload.php">
+    <testsuites>
+        <testsuite name="Doctrine Deprecations">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -33,25 +33,25 @@ Enable or Disable Doctrine deprecations to be sent as `trigger_error(E_USER_DEPR
 messages.
 
 ```php
-\Doctrine\Deprecations\Logger::enableWithTriggerError();
-\Doctrine\Deprecations\Logger::enableWithSuppressedTriggerError();
-\Doctrine\Deprecations\Logger::disableTriggerError();
+\Doctrine\Deprecations\Deprecation::enableWithTriggerError();
+\Doctrine\Deprecations\Deprecation::enableWithSuppressedTriggerError();
+\Doctrine\Deprecations\Deprecation::disable();
 ```
 
 Enable Doctrine deprecations to be sent to a PSR3 logger:
 
 ```php
-\Doctrine\Deprecations\Logger::enableWithPsr3Logger($logger);
+\Doctrine\Deprecations\Deprecation::enableWithPsr3Logger($logger);
 ```
 
 Disable deprecations from a package, starting at given version and above
 
 ```php
-\Doctrine\Deprecations\Logger::ignorePackage("doctrine/orm", "2.7");
+\Doctrine\Deprecations\Deprecation::ignorePackages("doctrine/orm");
 ```
 
 Disable a specific deprecation:
 
 ```php
-\Doctrine\Deprecations\Logger::ignoreDeprecation("https://link/to/deprecations-description");
+\Doctrine\Deprecations\Deprecation::ignoreDeprecations("https://link/to/deprecations-description");
 ```
