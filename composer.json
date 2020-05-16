@@ -3,6 +3,9 @@
         "phpunit/phpunit": "^9.0",
         "psr/log": "^1.0"
     },
+    "suggest": {
+        "psr/log": "Allows logging deprecations via PSR-3 logger implementation"
+    },
     "autoload": {
         "psr-4": {"Doctrine\\Deprecations\\": "lib/Doctrine/Deprecations"}
     }

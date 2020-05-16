@@ -3,8 +3,8 @@
 A small layer on top of `trigger_error(E_USER_DEPRECATED)` or PSR-3 logging
 with options to disable all deprecations or selectively for packages.
 
-By default it logs deprecations through the default PHP deprecation mechanism
-via `E_USER_DEPRECATED` and `trigger_error()`.
+By default it does not log deprecations at runtime and needs to be configured
+to log through either trigger_error or with a PSR-3 logger.
 
 ## Usage from consumer perspective:
 
