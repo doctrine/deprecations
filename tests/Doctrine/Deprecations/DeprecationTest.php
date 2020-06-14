@@ -17,10 +17,6 @@ class DeprecationTest extends TestCase
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredLinks');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
-
-        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredPackages');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue([]);
     }
 
     public function testDeprecation()
