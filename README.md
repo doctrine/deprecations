@@ -4,7 +4,9 @@ A small layer on top of `trigger_error(E_USER_DEPRECATED)` or PSR-3 logging
 with options to disable all deprecations or selectively for packages.
 
 By default it does not log deprecations at runtime and needs to be configured
-to log through either trigger_error or with a PSR-3 logger.
+to log through either trigger_error or with a PSR-3 logger. This is done to
+avoid side effects by deprecations on user error handlers that Doctrine has no
+control over.
 
 ## Usage from consumer perspective:
 
@@ -26,7 +28,7 @@ Enable Doctrine deprecations to be sent to a PSR3 logger:
 Disable deprecations from a package, starting at given version and above
 
 ```php
-\Doctrine\Deprecations\Deprecation::ignorePackages("doctrine/orm");
+\Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm", "2.8");
 ```
 
 Disable a specific deprecation:
@@ -46,6 +48,9 @@ Disable a specific deprecation:
     ...$args
 );
 ```
+
+If link is just a numeric string, then its concatented with the package name to
+point to a Github issue.
 
 If variable arguments are provided at the end, they are used with `sprintf` on
 the message.
