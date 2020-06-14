@@ -3,9 +3,26 @@
 namespace Doctrine\Deprecations;
 
 use PHPUnit\Framework\TestCase;
+use ReflectionProperty;
 
 class DeprecationTest extends TestCase
 {
+    public function setUp() : void
+    {
+        // reset the global state of Deprecation class accross tests
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredPackages');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue([]);
+
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredLinks');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue([]);
+
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredPackages');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue([]);
+    }
+
     public function testDeprecation()
     {
         Deprecation::enableWithTriggerError();
@@ -24,6 +41,29 @@ class DeprecationTest extends TestCase
         } catch(\Exception $e) {
             $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
             $this->assertEquals(["https://github.com/doctrine/deprecations/1234" => 1], Deprecation::getTriggeredDeprecations());
+
+            throw $e;
+        }
+    }
+
+    public function testDeprecationWithNumericLinkPointingToGithubIssue()
+    {
+        Deprecation::enableWithTriggerError();
+
+        $this->expectDeprecation('this is deprecated foo 1234 (DeprecationTest.php:23, https://github.com/doctrine/orm/1234, since doctrine/orm 2.7)');
+
+        try {
+            Deprecation::trigger(
+                "doctrine/orm",
+                "2.7",
+                "1234",
+                "this is deprecated %s %d",
+                "foo",
+                1234
+            );
+        } catch(\Exception $e) {
+            $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+            $this->assertEquals(["https://github.com/doctrine/orm/issue/1234" => 1], Deprecation::getTriggeredDeprecations());
 
             throw $e;
         }
@@ -51,5 +91,23 @@ class DeprecationTest extends TestCase
             "foo",
             1234
         );
+    }
+
+    public function testDeprecationWithIgnoredPackage()
+    {
+        Deprecation::enableWithTriggerError();
+        Deprecation::ignorePackage("doctrine/orm", "2.8");
+
+        Deprecation::trigger(
+            "doctrine/orm",
+            "2.8",
+            "1234",
+            "this is deprecated %s %d",
+            "foo",
+            1234
+        );
+
+        $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+        $this->assertEquals(["https://github.com/doctrine/orm/issue/1234" => 1], Deprecation::getTriggeredDeprecations());
     }
 }

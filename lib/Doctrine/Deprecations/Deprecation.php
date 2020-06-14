@@ -52,6 +52,10 @@ class Deprecation
      */
     public static function trigger(string $package, string $version, string $link, string $message, ...$args) : void
     {
+        if (is_numeric($link)) {
+            $link = "https://github.com/" . $package . "/issue/" . $link;
+        }
+
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
             return;
@@ -64,7 +68,7 @@ class Deprecation
             return;
         }
 
-        if (isset(self::$ignoredPackages[$package])) {
+        if (isset(self::$ignoredPackages[$package]) && version_compare($version, self::$ignoredPackages[$package]) >= 0) {
             return;
         }
 
@@ -108,33 +112,31 @@ class Deprecation
         }
     }
 
-    public static function enableWithTriggerError()
+    public static function enableWithTriggerError() : void
     {
         self::$type = self::TYPE_TRIGGER_ERROR;
     }
 
-    public static function enableWithSuppressedTriggerError()
+    public static function enableWithSuppressedTriggerError() : void
     {
         self::$type = self::TYPE_TRIGGER_SUPPRESSED_ERROR;
     }
 
-    public static function enableWithPsrLogger(LoggerInterface $logger)
+    public static function enableWithPsrLogger(LoggerInterface $logger) : void
     {
         self::$type = self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
 
-    public static function disable()
+    public static function disable() : void
     {
         self::$type = self::TYPE_NONE;
         self::$logger = null;
     }
 
-    public static function ignorePackages(...$packages) : void
+    public static function ignorePackage(string $packageName, string $version = "0.0.1") : void
     {
-        foreach ($packages as $package) {
-            self::$ignoredPackages[$package] = true;
-        }
+        self::$ignoredPackages[$packageName] = $version;
     }
 
     public static function ignoreDeprecations(...$links) : void
