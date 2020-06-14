@@ -31,7 +31,7 @@ Disable deprecations from a package, starting at given version and above
 \Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm", "2.8");
 ```
 
-Disable a specific deprecation:
+Disable triggering about specific deprecations:
 
 ```php
 \Doctrine\Deprecations\Deprecation::ignoreDeprecations("https://link/to/deprecations-description-identifier");
@@ -44,16 +44,35 @@ Disable a specific deprecation:
     "doctrine/orm",
     "2.7",
     "https://link/to/deprecations-description",
-    "message",
-    ...$args
+    "message"
 );
 ```
 
 If link is just a numeric string, then its concatented with the package name to
 point to a Github issue.
 
+```php
+\Doctrine\Deprecations\Deprecation::trigger(
+    "doctrine/orm",
+    "2.7",
+    "1234",
+    "message"
+);
+```
+
 If variable arguments are provided at the end, they are used with `sprintf` on
 the message.
+
+```php
+\Doctrine\Deprecations\Deprecation::trigger(
+    "doctrine/orm",
+    "2.7",
+    "1234",
+    "message %s %d",
+    "foo",
+    1234
+);
+```
 
 Based on the issue link each deprecation message is only triggered once per
 request, so it must be unique for each deprecation.
