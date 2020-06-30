@@ -132,6 +132,10 @@ class Deprecation
     {
         self::$type = self::TYPE_NONE;
         self::$logger = null;
+
+        foreach (self::$ignoredLinks as $link => $count) {
+            self::$ignoredLinks[$link] = 0;
+        }
     }
 
     public static function ignorePackage(string $packageName, string $version = "0.0.1") : void
@@ -148,7 +152,9 @@ class Deprecation
 
     public static function getUniqueTriggeredDeprecationsCount() : int
     {
-        return count(self::$ignoredLinks);
+        return array_reduce(self::$ignoredLinks, function (int $carry, int $count) {
+            return $carry + $count;
+        }, 0);
     }
 
     /**

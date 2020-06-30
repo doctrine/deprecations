@@ -42,6 +42,25 @@ class DeprecationTest extends TestCase
         }
     }
 
+    public function testDeprecationResetsCounts()
+    {
+        try {
+            Deprecation::trigger(
+                "doctrine/orm",
+                "2.7",
+                "https://github.com/doctrine/deprecations/1234",
+                "this is deprecated %s %d",
+                "foo",
+                1234
+            );
+        } catch(\Exception $e) {
+            Deprecation::disable();
+
+            $this->assertEquals(0, Deprecation::getUniqueTriggeredDeprecationsCount());
+            $this->assertEquals(["https://github.com/doctrine/deprecations/1234" => 0], Deprecation::getTriggeredDeprecations());
+        }
+    }
+
     public function testDeprecationWithNumericLinkPointingToGithubIssue()
     {
         Deprecation::enableWithTriggerError();
