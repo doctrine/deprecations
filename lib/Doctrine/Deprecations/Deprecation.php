@@ -48,7 +48,7 @@ class Deprecation
     /** @var int */
     private static $type = self::TYPE_NONE;
 
-    /** @var \Psr\Log\LoggerInterface|null */
+    /** @var LoggerInterface|null */
     private static $logger;
 
     /** @var array<string,bool> */
@@ -64,7 +64,7 @@ class Deprecation
      * deprecation. It is additionally used to de-duplicate the trigger of the
      * same deprecation during a request.
      *
-     * @param mixed[] $args
+     * @param mixed $args
      */
     public static function trigger(string $package, string $version, string $link, string $message, ...$args): void
     {
@@ -160,10 +160,7 @@ class Deprecation
         self::$ignoredPackages[$packageName] = $version;
     }
 
-    /**
-     * @param string[] $links
-     */
-    public static function ignoreDeprecations(...$links): void
+    public static function ignoreDeprecations(string ...$links): void
     {
         foreach ($links as $link) {
             self::$ignoredLinks[$link] = 0;
