@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Doctrine\Deprecations;
 
+use PHPUnit\Framework\Error\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use ReflectionProperty;
 use Throwable;
+
+use function method_exists;
 
 class DeprecationTest extends TestCase
 {
@@ -23,11 +26,30 @@ class DeprecationTest extends TestCase
         $reflectionProperty->setValue([]);
     }
 
+    public function expectDeprecation(): void
+    {
+        if (method_exists(TestCase::class, 'expectDeprecation')) {
+            parent::expectDeprecation();
+        } else {
+            parent::expectException(Deprecated::class);
+        }
+    }
+
+    public function expectDeprecationMessage(string $message): void
+    {
+        if (method_exists(TestCase::class, 'expectDeprecationMessage')) {
+            parent::expectDeprecationMessage($message);
+        } else {
+            parent::expectExceptionMessage($message);
+        }
+    }
+
     public function testDeprecation(): void
     {
         Deprecation::enableWithTriggerError();
 
-        $this->expectDeprecation('this is deprecated foo 1234 (DeprecationTest.php:23, https://github.com/doctrine/deprecations/1234, since doctrine/orm 2.7)');
+        $this->expectDeprecation();
+        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
 
         try {
             Deprecation::trigger(
@@ -69,7 +91,8 @@ class DeprecationTest extends TestCase
     {
         Deprecation::enableWithTriggerError();
 
-        $this->expectDeprecation('this is deprecated foo 1234 (DeprecationTest.php:23, https://github.com/doctrine/orm/1234, since doctrine/orm 2.7)');
+        $this->expectDeprecation();
+        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
 
         try {
             Deprecation::trigger(
