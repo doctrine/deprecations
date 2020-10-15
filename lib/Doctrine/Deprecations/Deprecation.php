@@ -57,6 +57,9 @@ class Deprecation
     /** @var array<string,int> */
     private static $ignoredLinks = [];
 
+    /** @var array<string,bool> */
+    private static $ignoreLinkOnce = [];
+
     /**
      * Trigger a deprecation for the given package, starting with given version.
      *
@@ -74,6 +77,12 @@ class Deprecation
 
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
+
+            return;
+        }
+
+        if (array_key_exists($link, self::$ignoreLinkOnce)) {
+            unset(self::$ignoreLinkOnce[$link]);
 
             return;
         }
@@ -165,6 +174,15 @@ class Deprecation
         foreach ($links as $link) {
             self::$ignoredLinks[$link] = 0;
         }
+    }
+
+    public static function ignoreDeprecationOnce(string $link, ?string $package = null)
+    {
+        if (is_numeric($link)) {
+            $link = 'https://github.com/' . $package . '/issue/' . $link;
+        }
+
+        self::$ignoreLinkOnce[$link] = true;
     }
 
     public static function getUniqueTriggeredDeprecationsCount(): int

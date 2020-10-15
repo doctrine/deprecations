@@ -152,4 +152,37 @@ class DeprecationTest extends TestCase
         $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
         $this->assertEquals(['https://github.com/doctrine/orm/issue/1234' => 1], Deprecation::getTriggeredDeprecations());
     }
+
+    public function testDeprecationIgnoredOnce(): void
+    {
+        Deprecation::enableWithTriggerError();
+
+        Deprecation::ignoreDeprecationOnce('1234', 'doctrine/orm');
+
+        $this->triggerDeprecation();
+
+        $this->expectDeprecation();
+        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
+
+        try {
+            $this->triggerDeprecation();
+        } catch (Throwable $e) {
+            $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+            $this->assertEquals(['https://github.com/doctrine/orm/issue/1234' => 1], Deprecation::getTriggeredDeprecations());
+
+            throw $e;
+        }
+    }
+
+    private function triggerDeprecation()
+    {
+        Deprecation::trigger(
+            'doctrine/orm',
+            '2.7',
+            '1234',
+            'this is deprecated %s %d',
+            'foo',
+            1234
+        );
+    }
 }
