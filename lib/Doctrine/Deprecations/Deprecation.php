@@ -81,6 +81,8 @@ class Deprecation
         // ignore this deprecation until the end of the request now
         self::$ignoredLinks[$link] = 1;
 
+        // do not move this condition to the top, because we still want to
+        // count occcurences of deprecations even when we are not logging them.
         if (self::$type === self::TYPE_NONE) {
             return;
         }
