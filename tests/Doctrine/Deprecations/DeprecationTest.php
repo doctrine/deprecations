@@ -87,30 +87,6 @@ class DeprecationTest extends TestCase
         }
     }
 
-    public function testDeprecationWithNumericLinkPointingToGithubIssue(): void
-    {
-        Deprecation::enableWithTriggerError();
-
-        $this->expectDeprecation();
-        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
-
-        try {
-            Deprecation::trigger(
-                'doctrine/orm',
-                '2.7',
-                '1234',
-                'this is deprecated %s %d',
-                'foo',
-                1234
-            );
-        } catch (Throwable $e) {
-            $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
-            $this->assertEquals(['https://github.com/doctrine/orm/issue/1234' => 1], Deprecation::getTriggeredDeprecations());
-
-            throw $e;
-        }
-    }
-
     public function testDeprecationWithPsrLogger(): void
     {
         $mock = $this->createMock(LoggerInterface::class);
@@ -143,7 +119,7 @@ class DeprecationTest extends TestCase
         Deprecation::trigger(
             'doctrine/orm',
             '2.8',
-            '1234',
+            'https://github.com/doctrine/orm/issue/1234',
             'this is deprecated %s %d',
             'foo',
             1234

@@ -68,10 +68,6 @@ class Deprecation
      */
     public static function trigger(string $package, string $version, string $link, string $message, ...$args): void
     {
-        if (is_numeric($link)) {
-            $link = 'https://github.com/' . $package . '/issue/' . $link;
-        }
-
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
 

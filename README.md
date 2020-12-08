@@ -48,18 +48,6 @@ Disable triggering about specific deprecations:
 );
 ```
 
-If link is just a numeric string, then its concatented with the package name to
-point to a Github issue.
-
-```php
-\Doctrine\Deprecations\Deprecation::trigger(
-    "doctrine/orm",
-    "2.7",
-    "1234",
-    "message"
-);
-```
-
 If variable arguments are provided at the end, they are used with `sprintf` on
 the message.
 
@@ -67,7 +55,7 @@ the message.
 \Doctrine\Deprecations\Deprecation::trigger(
     "doctrine/orm",
     "2.7",
-    "1234",
+    "https://github.com/doctrine/orm/issue/1234",
     "message %s %d",
     "foo",
     1234
@@ -79,3 +67,9 @@ request, so it must be unique for each deprecation.
 
 A limited stacktrace is included in the deprecation message to find the
 offending location.
+
+## What is a deprecation identifier?
+
+An identifier for deprecations is just a link to any resource, most often a
+Github Issue or Pull Request explaining the deprecation and potentially its
+alternative.
