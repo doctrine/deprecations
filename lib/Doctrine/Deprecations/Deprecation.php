@@ -123,7 +123,7 @@ class Deprecation
             $context['since']   = $version;
             $context['link']    = $link;
 
-            self::$logger->warning($message, $context);
+            self::$logger->notice($message, $context);
         }
     }
 
