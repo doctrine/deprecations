@@ -90,7 +90,7 @@ class DeprecationTest extends TestCase
     public function testDeprecationWithPsrLogger(): void
     {
         $mock = $this->createMock(LoggerInterface::class);
-        $mock->method('debug')->with('this is deprecated foo 1234', $this->callback(function ($context) {
+        $mock->method('warning')->with('this is deprecated foo 1234', $this->callback(function ($context) {
             $this->assertEquals(__FILE__, $context['file']);
             $this->assertEquals('doctrine/orm', $context['package']);
             $this->assertEquals('2.7', $context['since']);
