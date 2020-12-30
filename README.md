@@ -37,6 +37,16 @@ Disable triggering about specific deprecations:
 \Doctrine\Deprecations\Deprecation::ignoreDeprecations("https://link/to/deprecations-description-identifier");
 ```
 
+Access is provided to all triggered deprecations and their individual count:
+
+```php
+$deprecations = \Doctrine\Deprecations\Deprecation::getTriggeredDeprecations();
+
+foreach ($deprecations as $identifier => $count) {
+    echo $identifier . " was triggered " . $count . " times\n";
+}
+```
+
 ## Usage from a library perspective:
 
 ```php
