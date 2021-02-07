@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Doctrine\Deprecations;
 
+use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use PHPUnit\Framework\Error\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -14,6 +15,8 @@ use function method_exists;
 
 class DeprecationTest extends TestCase
 {
+    use VerifyDeprecations;
+
     public function setUp(): void
     {
         // reset the global state of Deprecation class accross tests
@@ -50,6 +53,8 @@ class DeprecationTest extends TestCase
 
         $this->expectDeprecation();
         $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
+
+        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/1234');
 
         try {
             Deprecation::trigger(
@@ -89,6 +94,8 @@ class DeprecationTest extends TestCase
 
     public function testDeprecationWithPsrLogger(): void
     {
+        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/2222');
+
         $mock = $this->createMock(LoggerInterface::class);
         $mock->method('notice')->with('this is deprecated foo 1234', $this->callback(function ($context) {
             $this->assertEquals(__FILE__, $context['file']);
