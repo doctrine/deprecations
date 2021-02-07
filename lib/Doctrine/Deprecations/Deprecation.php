@@ -12,7 +12,6 @@ use function basename;
 use function debug_backtrace;
 use function sprintf;
 use function trigger_error;
-use function version_compare;
 
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
 use const E_USER_DEPRECATED;
@@ -65,7 +64,7 @@ class Deprecation
      *
      * @param mixed $args
      */
-    public static function trigger(string $package, string $version, string $link, string $message, ...$args): void
+    public static function trigger(string $package, string $link, string $message, ...$args): void
     {
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
@@ -82,7 +81,7 @@ class Deprecation
             return;
         }
 
-        if (isset(self::$ignoredPackages[$package]) && version_compare($version, self::$ignoredPackages[$package]) >= 0) {
+        if (isset(self::$ignoredPackages[$package])) {
             return;
         }
 
@@ -92,23 +91,21 @@ class Deprecation
 
         if (self::$type === self::TYPE_TRIGGER_ERROR) {
             $message .= sprintf(
-                ' (%s:%s, %s, since %s %s)',
+                ' (%s:%s, %s, package %s)',
                 basename($backtrace[0]['file']),
                 $backtrace[0]['line'],
                 $link,
-                $package,
-                $version
+                $package
             );
 
             trigger_error($message, E_USER_DEPRECATED);
         } elseif (self::$type === self::TYPE_TRIGGER_SUPPRESSED_ERROR) {
             $message .= sprintf(
-                ' (%s:%s, %s, since %s %s)',
+                ' (%s:%s, %s, package %s)',
                 basename($backtrace[0]['file']),
                 $backtrace[0]['line'],
                 $link,
-                $package,
-                $version
+                $package
             );
 
             @trigger_error($message, E_USER_DEPRECATED);
@@ -119,7 +116,6 @@ class Deprecation
             ];
 
             $context['package'] = $package;
-            $context['since']   = $version;
             $context['link']    = $link;
 
             self::$logger->notice($message, $context);
@@ -152,9 +148,9 @@ class Deprecation
         }
     }
 
-    public static function ignorePackage(string $packageName, string $version = '0.0.1'): void
+    public static function ignorePackage(string $packageName): void
     {
-        self::$ignoredPackages[$packageName] = $version;
+        self::$ignoredPackages[$packageName] = true;
     }
 
     public static function ignoreDeprecations(string ...$links): void

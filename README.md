@@ -25,10 +25,10 @@ Enable Doctrine deprecations to be sent to a PSR3 logger:
 \Doctrine\Deprecations\Deprecation::enableWithPsrLogger($logger);
 ```
 
-Disable deprecations from a package, starting at given version and above
+Disable deprecations from a package
 
 ```php
-\Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm", "2.8");
+\Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm");
 ```
 
 Disable triggering about specific deprecations:
@@ -52,7 +52,6 @@ foreach ($deprecations as $identifier => $count) {
 ```php
 \Doctrine\Deprecations\Deprecation::trigger(
     "doctrine/orm",
-    "2.7",
     "https://link/to/deprecations-description",
     "message"
 );
@@ -64,7 +63,6 @@ the message.
 ```php
 \Doctrine\Deprecations\Deprecation::trigger(
     "doctrine/orm",
-    "2.7",
     "https://github.com/doctrine/orm/issue/1234",
     "message %s %d",
     "foo",
