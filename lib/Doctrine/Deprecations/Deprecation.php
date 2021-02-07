@@ -10,7 +10,6 @@ use function array_key_exists;
 use function array_reduce;
 use function basename;
 use function debug_backtrace;
-use function is_numeric;
 use function sprintf;
 use function trigger_error;
 use function version_compare;

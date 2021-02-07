@@ -78,6 +78,27 @@ request, so it must be unique for each deprecation.
 A limited stacktrace is included in the deprecation message to find the
 offending location.
 
+## Usage in PHPUnit tests
+
+There is a `VerifyDeprecations` trait that you can use to make assertions on
+the occurrence of deprecations within a test.
+
+```php
+use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
+
+class MyTest extends TestCase
+{
+    use VerifyDeprecations;
+
+    public function testSomethingDeprecation()
+    {
+        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/orm/issue/1234');
+
+        triggerTheCodeWithDeprecation();
+    }
+}
+```
+
 ## What is a deprecation identifier?
 
 An identifier for deprecations is just a link to any resource, most often a
