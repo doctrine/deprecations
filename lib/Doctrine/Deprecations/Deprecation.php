@@ -20,7 +20,7 @@ use const E_USER_DEPRECATED;
  * Manages Deprecation logging in different ways.
  *
  * By default triggered exceptions are not logged, only the amount of
- * depreceations triggered can be queried with `Deprecation::getUniqueTriggeredDeprecationsCount()`.
+ * deprecations triggered can be queried with `Deprecation::getUniqueTriggeredDeprecationsCount()`.
  *
  * To enable different deprecation logging mechanisms you can call the
  * following methods:
