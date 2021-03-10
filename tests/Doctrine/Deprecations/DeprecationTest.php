@@ -52,7 +52,7 @@ class DeprecationTest extends TestCase
         Deprecation::enableWithTriggerError();
 
         $this->expectDeprecation();
-        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
+        $this->expectDeprecationMessage('this is deprecated foo 1234');
 
         $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/1234');
 

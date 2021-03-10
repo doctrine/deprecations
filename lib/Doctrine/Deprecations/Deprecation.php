@@ -8,7 +8,6 @@ use Psr\Log\LoggerInterface;
 
 use function array_key_exists;
 use function array_reduce;
-use function basename;
 use function debug_backtrace;
 use function sprintf;
 use function trigger_error;
@@ -25,11 +24,8 @@ use const E_USER_DEPRECATED;
  * To enable different deprecation logging mechanisms you can call the
  * following methods:
  *
- *  - Uses trigger_error with E_USER_DEPRECATED
+ *  - Uses @trigger_error() with E_USER_DEPRECATED
  *    \Doctrine\Deprecations\Deprecation::enableWithTriggerError();
- *
- *  - Uses @trigger_error with E_USER_DEPRECATED
- *    \Doctrine\Deprecations\Deprecation::enableWithSuppressedTriggerError();
  *
  *  - Sends deprecation messages via a PSR-3 logger
  *    \Doctrine\Deprecations\Deprecation::enableWithPsrLogger($logger);
@@ -38,13 +34,8 @@ use const E_USER_DEPRECATED;
  */
 class Deprecation
 {
-    private const TYPE_NONE                     = 0;
-    private const TYPE_TRIGGER_ERROR            = 1;
-    private const TYPE_TRIGGER_SUPPRESSED_ERROR = 2;
-    private const TYPE_PSR_LOGGER               = 3;
-
-    /** @var int */
-    private static $type = self::TYPE_NONE;
+    /** @var bool */
+    private static $triggerError = false;
 
     /** @var LoggerInterface|null */
     private static $logger;
@@ -77,7 +68,7 @@ class Deprecation
 
         // do not move this condition to the top, because we still want to
         // count occcurences of deprecations even when we are not logging them.
-        if (self::$type === self::TYPE_NONE) {
+        if (!self::$triggerError && self::$logger === null) {
             return;
         }
 
@@ -85,63 +76,48 @@ class Deprecation
             return;
         }
 
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
-
         $message = sprintf($message, ...$args);
 
-        if (self::$type === self::TYPE_TRIGGER_ERROR) {
+        if (self::$triggerError) {
             $message .= sprintf(
-                ' (%s:%s, %s, package %s)',
-                basename($backtrace[0]['file']),
-                $backtrace[0]['line'],
-                $link,
-                $package
-            );
-
-            trigger_error($message, E_USER_DEPRECATED);
-        } elseif (self::$type === self::TYPE_TRIGGER_SUPPRESSED_ERROR) {
-            $message .= sprintf(
-                ' (%s:%s, %s, package %s)',
-                basename($backtrace[0]['file']),
-                $backtrace[0]['line'],
+                ' (%s, package %s)',
                 $link,
                 $package
             );
 
             @trigger_error($message, E_USER_DEPRECATED);
-        } elseif (self::$type === self::TYPE_PSR_LOGGER) {
-            $context = [
-                'file' => $backtrace[0]['file'],
-                'line' => $backtrace[0]['line'],
-            ];
 
-            $context['package'] = $package;
-            $context['link']    = $link;
-
-            self::$logger->notice($message, $context);
+            if (self::$logger === null) {
+                return;
+            }
         }
+
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $context   = [
+            'file' => $backtrace[0]['file'],
+            'line' => $backtrace[0]['line'],
+        ];
+
+        $context['package'] = $package;
+        $context['link']    = $link;
+
+        self::$logger->notice($message, $context);
     }
 
     public static function enableWithTriggerError(): void
     {
-        self::$type = self::TYPE_TRIGGER_ERROR;
-    }
-
-    public static function enableWithSuppressedTriggerError(): void
-    {
-        self::$type = self::TYPE_TRIGGER_SUPPRESSED_ERROR;
+        self::$triggerError = true;
     }
 
     public static function enableWithPsrLogger(LoggerInterface $logger): void
     {
-        self::$type   = self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
 
     public static function disable(): void
     {
-        self::$type   = self::TYPE_NONE;
-        self::$logger = null;
+        self::$triggerError = true;
+        self::$logger       = null;
 
         foreach (self::$ignoredLinks as $link => $count) {
             self::$ignoredLinks[$link] = 0;
