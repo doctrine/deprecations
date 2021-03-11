@@ -56,6 +56,9 @@ the deduplication can be disabled:
 
 ## Usage from a library/producer perspective:
 
+When you want to unconditionally trigger a deprecation even when called
+from the library itself then the `trigger` method is the way to go:
+
 ```php
 \Doctrine\Deprecations\Deprecation::trigger(
     "doctrine/orm",
@@ -77,6 +80,18 @@ the message.
 );
 ```
 
+When you want to trigger a deprecation only when it is called by a function
+outside of the current package, but not trigger when the package itself is the cause,
+then use:
+
+```php
+\Doctrine\Deprecations\Deprecation::triggerIfCalledFromOutside(
+    "doctrine/orm",
+    "https://link/to/deprecations-description",
+    "message"
+);
+```
+
 Based on the issue link each deprecation message is only triggered once per
 request, so it must be unique for each deprecation.
 
@@ -86,21 +101,6 @@ offending location.
 Note: A producer/library should never call `Deprecation::enableWith` methods
 and leave the decision how to handle deprecations to application and
 frameworks.
-
-Sometimes you cannot avoid to trigger a deprecation from the library itself,
-specifically when the new alternative functionality still calls the old API
-internally.
-
-In that case you can temporarily ignore a deprecation for 1 or more calls with
-this API:
-
-```php
-\Doctrine\Deprecations\Deprecation::ignoreDeprecationTemporarily(
-    'https://github.com/doctrine/orm/issue/1234'
-);
-```
-
-Pass the number of times to ignore as a second argument when it is more than once.
 
 ## Usage in PHPUnit tests
 
