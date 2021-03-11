@@ -11,6 +11,7 @@ use function array_reduce;
 use function basename;
 use function debug_backtrace;
 use function sprintf;
+use function strpos;
 use function trigger_error;
 
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
@@ -55,9 +56,6 @@ class Deprecation
     /** @var array<string,int> */
     private static $ignoredLinks = [];
 
-    /** @var array<string,int> */
-    private static $temporarilyIgnoredLinks = [];
-
     /** @var bool */
     private static $deduplication = true;
 
@@ -72,18 +70,6 @@ class Deprecation
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
-        // Do not trigger this deprecation if it is temporarily ignored,
-        // because it is expected to be called for 1 or more times.
-        if (array_key_exists($link, self::$temporarilyIgnoredLinks)) {
-            self::$temporarilyIgnoredLinks[$link]--;
-
-            if (self::$temporarilyIgnoredLinks[$link] <= 0) {
-                unset(self::$temporarilyIgnoredLinks[$link]);
-            }
-
-            return;
-        }
-
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
         } else {
@@ -108,6 +94,58 @@ class Deprecation
 
         $message = sprintf($message, ...$args);
 
+        self::delegateTriggerToBackend($message, $backtrace, $link, $package);
+    }
+
+    /**
+     * @param mixed $args
+     */
+    public static function triggerIfCalledFromOutside(string $package, string $link, string $message, ...$args): void
+    {
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+
+        // "outside" means we assume that $package is currently installed as a
+        // dependency and the caller is not a file in that package.
+        // When $package is installed as a root package, then this deprecation
+        // is always ignored
+        if (strpos($backtrace[0]['file'], 'vendor/' . $package . '/') === false) {
+            return;
+        }
+
+        if (strpos($backtrace[1]['file'], 'vendor/' . $package . '/') !== false) {
+            return;
+        }
+
+        if (array_key_exists($link, self::$ignoredLinks)) {
+            self::$ignoredLinks[$link]++;
+        } else {
+            self::$ignoredLinks[$link] = 1;
+        }
+
+        if (self::$deduplication === true && self::$ignoredLinks[$link] > 1) {
+            return;
+        }
+
+        // do not move this condition to the top, because we still want to
+        // count occcurences of deprecations even when we are not logging them.
+        if (self::$type === self::TYPE_NONE) {
+            return;
+        }
+
+        if (isset(self::$ignoredPackages[$package])) {
+            return;
+        }
+
+        $message = sprintf($message, ...$args);
+
+        self::delegateTriggerToBackend($message, $backtrace, $link, $package);
+    }
+
+    /**
+     * @param array<mixed> $backtrace
+     */
+    private static function delegateTriggerToBackend(string $message, array $backtrace, string $link, string $package): void
+    {
         if (self::$type === self::TYPE_TRIGGER_ERROR) {
             $message .= sprintf(
                 ' (%s:%d called by %s:%d, %s, package %s)',
@@ -175,8 +213,6 @@ class Deprecation
         foreach (self::$ignoredLinks as $link => $count) {
             self::$ignoredLinks[$link] = 0;
         }
-
-        self::$temporarilyIgnoredLinks = [];
     }
 
     public static function ignorePackage(string $packageName): void
@@ -189,11 +225,6 @@ class Deprecation
         foreach ($links as $link) {
             self::$ignoredLinks[$link] = 0;
         }
-    }
-
-    public static function ignoreDeprecationTemporarily(string $link, int $times = 1): void
-    {
-        self::$temporarilyIgnoredLinks[$link] = $times;
     }
 
     public static function getUniqueTriggeredDeprecationsCount(): int
