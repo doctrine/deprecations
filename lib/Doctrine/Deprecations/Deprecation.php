@@ -85,15 +85,17 @@ class Deprecation
             return;
         }
 
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1);
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         $message = sprintf($message, ...$args);
 
         if (self::$type === self::TYPE_TRIGGER_ERROR) {
             $message .= sprintf(
-                ' (%s:%s, %s, package %s)',
+                ' (%s:%d called by %s:%d, %s, package %s)',
                 basename($backtrace[0]['file']),
                 $backtrace[0]['line'],
+                basename($backtrace[1]['file']),
+                $backtrace[1]['line'],
                 $link,
                 $package
             );
@@ -101,9 +103,11 @@ class Deprecation
             trigger_error($message, E_USER_DEPRECATED);
         } elseif (self::$type === self::TYPE_TRIGGER_SUPPRESSED_ERROR) {
             $message .= sprintf(
-                ' (%s:%s, %s, package %s)',
+                ' (%s:%d called by %s:%d, %s, package %s)',
                 basename($backtrace[0]['file']),
                 $backtrace[0]['line'],
+                basename($backtrace[1]['file']),
+                $backtrace[1]['line'],
                 $link,
                 $package
             );

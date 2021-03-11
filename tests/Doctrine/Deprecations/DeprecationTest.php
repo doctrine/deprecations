@@ -65,6 +65,10 @@ class DeprecationTest extends TestCase
                 1234
             );
         } catch (Throwable $e) {
+            $this->assertStringMatchesFormat(
+                'this is deprecated foo 1234 (DeprecationTest.php:%d called by TestCase.php:%d, https://github.com/doctrine/deprecations/1234, package doctrine/orm)',
+                $e->getMessage()
+            );
             $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
             $this->assertEquals(['https://github.com/doctrine/deprecations/1234' => 1], Deprecation::getTriggeredDeprecations());
 
