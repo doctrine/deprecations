@@ -55,6 +55,9 @@ class Deprecation
     /** @var array<string,int> */
     private static $ignoredLinks = [];
 
+    /** @var bool */
+    private static $deduplication = true;
+
     /**
      * Trigger a deprecation for the given package, starting with given version.
      *
@@ -68,12 +71,13 @@ class Deprecation
     {
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
-
-            return;
+        } else {
+            self::$ignoredLinks[$link] = 1;
         }
 
-        // ignore this deprecation until the end of the request now
-        self::$ignoredLinks[$link] = 1;
+        if (self::$deduplication === true && self::$ignoredLinks[$link] > 1) {
+            return;
+        }
 
         // do not move this condition to the top, because we still want to
         // count occcurences of deprecations even when we are not logging them.
@@ -142,10 +146,16 @@ class Deprecation
         self::$logger = $logger;
     }
 
+    public static function withoutDeduplication(): void
+    {
+        self::$deduplication = false;
+    }
+
     public static function disable(): void
     {
-        self::$type   = self::TYPE_NONE;
-        self::$logger = null;
+        self::$type          = self::TYPE_NONE;
+        self::$logger        = null;
+        self::$deduplication = true;
 
         foreach (self::$ignoredLinks as $link => $count) {
             self::$ignoredLinks[$link] = 0;
