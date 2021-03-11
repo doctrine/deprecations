@@ -87,6 +87,21 @@ Note: A producer/library should never call `Deprecation::enableWith` methods
 and leave the decision how to handle deprecations to application and
 frameworks.
 
+Sometimes you cannot avoid to trigger a deprecation from the library itself,
+specifically when the new alternative functionality still calls the old API
+internally.
+
+In that case you can temporarily ignore a deprecation for 1 or more calls with
+this API:
+
+```php
+\Doctrine\Deprecations\Deprecation::ignoreDeprecationTemporarily(
+    'https://github.com/doctrine/orm/issue/1234'
+);
+```
+
+Pass the number of times to ignore as a second argument when it is more than once.
+
 ## Usage in PHPUnit tests
 
 There is a `VerifyDeprecations` trait that you can use to make assertions on
