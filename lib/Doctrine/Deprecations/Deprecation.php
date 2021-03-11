@@ -55,6 +55,9 @@ class Deprecation
     /** @var array<string,int> */
     private static $ignoredLinks = [];
 
+    /** @var array<string,int> */
+    private static $temporarilyIgnoredLinks = [];
+
     /** @var bool */
     private static $deduplication = true;
 
@@ -69,6 +72,18 @@ class Deprecation
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
+        // Do not trigger this deprecation if it is temporarily ignored,
+        // because it is expected to be called for 1 or more times.
+        if (array_key_exists($link, self::$temporarilyIgnoredLinks)) {
+            self::$temporarilyIgnoredLinks[$link]--;
+
+            if (self::$temporarilyIgnoredLinks[$link] <= 0) {
+                unset(self::$temporarilyIgnoredLinks[$link]);
+            }
+
+            return;
+        }
+
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
         } else {
@@ -160,6 +175,8 @@ class Deprecation
         foreach (self::$ignoredLinks as $link => $count) {
             self::$ignoredLinks[$link] = 0;
         }
+
+        self::$temporarilyIgnoredLinks = [];
     }
 
     public static function ignorePackage(string $packageName): void
@@ -172,6 +189,11 @@ class Deprecation
         foreach ($links as $link) {
             self::$ignoredLinks[$link] = 0;
         }
+    }
+
+    public static function ignoreDeprecationTemporarily(string $link, int $times = 1): void
+    {
+        self::$temporarilyIgnoredLinks[$link] = $times;
     }
 
     public static function getUniqueTriggeredDeprecationsCount(): int
