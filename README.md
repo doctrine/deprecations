@@ -47,7 +47,14 @@ foreach ($deprecations as $identifier => $count) {
 }
 ```
 
-## Usage from a library perspective:
+When used within PHPUnit or other tools that could collect multiple instances of the same deprecations
+the deduplication can be disabled:
+
+```php
+\Doctrine\Deprecations\Deprecation::withoutDeduplication();
+```
+
+## Usage from a library/producer perspective:
 
 ```php
 \Doctrine\Deprecations\Deprecation::trigger(
@@ -75,6 +82,10 @@ request, so it must be unique for each deprecation.
 
 A limited stacktrace is included in the deprecation message to find the
 offending location.
+
+Note: A producer/library should never call `Deprecation::enableWith` methods
+and leave the decision how to handle deprecations to application and
+frameworks.
 
 ## Usage in PHPUnit tests
 
