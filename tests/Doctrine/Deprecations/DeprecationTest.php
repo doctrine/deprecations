@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Doctrine\Deprecations;
 
 use DeprecationTests\Foo;
+use DeprecationTests\RootDeprecation;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use Doctrine\Foo\Baz;
 use PHPUnit\Framework\Error\Deprecated;
@@ -229,24 +230,18 @@ class DeprecationTest extends TestCase
         Deprecation::enableWithTriggerError();
 
         $this->expectDeprecation();
-        $this->expectDeprecationMessage('this is deprecated foo 1234 (DeprecationTest.php');
+        $this->expectDeprecationMessage('this is deprecated foo 1234 (RootDeprecation.php');
 
         $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/4444');
 
         $e = null;
         try {
-            Deprecation::triggerIfCalledFromOutside(
-                'doctrine/orm',
-                'https://github.com/doctrine/deprecations/4444',
-                'this is deprecated %s %d',
-                'foo',
-                1234
-            );
+            RootDeprecation::run();
 
             $this->fail('Should never be reached because of deprecation exception');
         } catch (Throwable $e) {
             $this->assertStringMatchesFormat(
-                'this is deprecated foo 1234 (DeprecationTest.php:%d called by TestCase.php:%d, https://github.com/doctrine/deprecations/4444, package doctrine/orm)',
+                'this is deprecated foo 1234 (RootDeprecation.php:%d called by DeprecationTest.php:%d, https://github.com/doctrine/deprecations/4444, package doctrine/orm)',
                 $e->getMessage()
             );
             $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
