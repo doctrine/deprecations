@@ -1,23 +1,16 @@
 # Doctrine Deprecations
 
-A small layer on top of `trigger_error(E_USER_DEPRECATED)` or PSR-3 logging
-with options to disable all deprecations or selectively for packages.
+A small (side-effect free by default) layer on top of
+`trigger_error(E_USER_DEPRECATED)` or PSR-3 logging.
 
-By default it does not log deprecations at runtime and needs to be configured
-to log through either trigger_error or with a PSR-3 logger. This is done to
-avoid side effects by deprecations on user error handlers that Doctrine has no
-control over.
+- no side-effects by default, making it a perfect fit for libraries that don't know how the error handler works they operate under
+- options to avoid having to rely on global state entirely with PSR-3 logging
+- deduplicate deprecation messages to avoid excessive triggering and reduce overhead
+
+We recommend to collect Deprecations using a PSR logger instead of relying on
+the global error handler.
 
 ## Usage from consumer perspective:
-
-Enable or Disable Doctrine deprecations to be sent as `trigger_error(E_USER_DEPRECATED)`
-messages.
-
-```php
-\Doctrine\Deprecations\Deprecation::enableWithTriggerError();
-\Doctrine\Deprecations\Deprecation::enableWithSuppressedTriggerError();
-\Doctrine\Deprecations\Deprecation::disable();
-```
 
 Enable Doctrine deprecations to be sent to a PSR3 logger:
 
@@ -25,16 +18,17 @@ Enable Doctrine deprecations to be sent to a PSR3 logger:
 \Doctrine\Deprecations\Deprecation::enableWithPsrLogger($logger);
 ```
 
-Disable deprecations from a package
+Enable Doctrine deprecations to be sent as `@trigger_error($message, E_USER_DEPRECATED)`
+messages.
 
 ```php
-\Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm");
+\Doctrine\Deprecations\Deprecation::enableWithTriggerError();
 ```
 
-Disable triggering about specific deprecations:
+If you only want to enable depreaction tracking, without logging or calling `trigger_error` then call:
 
 ```php
-\Doctrine\Deprecations\Deprecation::ignoreDeprecations("https://link/to/deprecations-description-identifier");
+\Doctrine\Deprecations\Deprecation::enableTrackingDeprecations();
 ```
 
 Access is provided to all triggered deprecations and their individual count:
@@ -47,11 +41,33 @@ foreach ($deprecations as $identifier => $count) {
 }
 ```
 
+### Supressing Specifc Deprecations
+
+Disable triggering about specific deprecations:
+
+```php
+\Doctrine\Deprecations\Deprecation::ignoreDeprecations("https://link/to/deprecations-description-identifier");
+```
+
+Disable all deprecations from a package
+
+```php
+\Doctrine\Deprecations\Deprecation::ignorePackage("doctrine/orm");
+```
+
+### Other Operations
+
 When used within PHPUnit or other tools that could collect multiple instances of the same deprecations
 the deduplication can be disabled:
 
 ```php
 \Doctrine\Deprecations\Deprecation::withoutDeduplication();
+```
+
+Disable deprecation tracking again:
+
+```php
+\Doctrine\Deprecations\Deprecation::disable();
 ```
 
 ## Usage from a library/producer perspective:
@@ -93,7 +109,7 @@ then use:
 ```
 
 Based on the issue link each deprecation message is only triggered once per
-request, so it must be unique for each deprecation.
+request.
 
 A limited stacktrace is included in the deprecation message to find the
 offending location.

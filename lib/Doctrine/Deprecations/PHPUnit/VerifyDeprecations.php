@@ -27,6 +27,14 @@ trait VerifyDeprecations
     }
 
     /**
+     * @before
+     */
+    public function enableDeprecationTracking(): void
+    {
+        Deprecation::enableTrackingDeprecations();
+    }
+
+    /**
      * @after
      */
     public function verifyDeprecationsAreTriggered(): void

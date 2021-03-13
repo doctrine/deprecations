@@ -8,13 +8,13 @@ use Doctrine\Foo\Bar;
 
 class Foo
 {
-    public function triggerDependencyWithDeprecation(): void
+    public static function triggerDependencyWithDeprecation(): void
     {
         $bar = new Bar();
         $bar->oldFunc();
     }
 
-    public function triggerDependencyWithDeprecationFromInside(): void
+    public static function triggerDependencyWithDeprecationFromInside(): void
     {
         $bar = new Bar();
         $bar->newFunc();

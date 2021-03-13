@@ -39,10 +39,10 @@ use const E_USER_DEPRECATED;
  */
 class Deprecation
 {
-    private const TYPE_NONE                     = 0;
-    private const TYPE_TRIGGER_ERROR            = 1;
-    private const TYPE_TRIGGER_SUPPRESSED_ERROR = 2;
-    private const TYPE_PSR_LOGGER               = 3;
+    private const TYPE_NONE               = 0;
+    private const TYPE_TRACK_DEPRECATIONS = 1;
+    private const TYPE_TRIGGER_ERROR      = 2;
+    private const TYPE_PSR_LOGGER         = 4;
 
     /** @var int */
     private static $type = self::TYPE_NONE;
@@ -70,6 +70,10 @@ class Deprecation
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
+        if (self::$type === self::TYPE_NONE) {
+            return;
+        }
+
         if (array_key_exists($link, self::$ignoredLinks)) {
             self::$ignoredLinks[$link]++;
         } else {
@@ -77,12 +81,6 @@ class Deprecation
         }
 
         if (self::$deduplication === true && self::$ignoredLinks[$link] > 1) {
-            return;
-        }
-
-        // do not move this condition to the top, because we still want to
-        // count occcurences of deprecations even when we are not logging them.
-        if (self::$type === self::TYPE_NONE) {
             return;
         }
 
@@ -102,6 +100,10 @@ class Deprecation
      */
     public static function triggerIfCalledFromOutside(string $package, string $link, string $message, ...$args): void
     {
+        if (self::$type === self::TYPE_NONE) {
+            return;
+        }
+
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         // "outside" means we assume that $package is currently installed as a
@@ -129,12 +131,6 @@ class Deprecation
             return;
         }
 
-        // do not move this condition to the top, because we still want to
-        // count occcurences of deprecations even when we are not logging them.
-        if (self::$type === self::TYPE_NONE) {
-            return;
-        }
-
         if (isset(self::$ignoredPackages[$package])) {
             return;
         }
@@ -149,31 +145,7 @@ class Deprecation
      */
     private static function delegateTriggerToBackend(string $message, array $backtrace, string $link, string $package): void
     {
-        if (self::$type === self::TYPE_TRIGGER_ERROR) {
-            $message .= sprintf(
-                ' (%s:%d called by %s:%d, %s, package %s)',
-                basename($backtrace[0]['file']),
-                $backtrace[0]['line'],
-                basename($backtrace[1]['file']),
-                $backtrace[1]['line'],
-                $link,
-                $package
-            );
-
-            trigger_error($message, E_USER_DEPRECATED);
-        } elseif (self::$type === self::TYPE_TRIGGER_SUPPRESSED_ERROR) {
-            $message .= sprintf(
-                ' (%s:%d called by %s:%d, %s, package %s)',
-                basename($backtrace[0]['file']),
-                $backtrace[0]['line'],
-                basename($backtrace[1]['file']),
-                $backtrace[1]['line'],
-                $link,
-                $package
-            );
-
-            @trigger_error($message, E_USER_DEPRECATED);
-        } elseif (self::$type === self::TYPE_PSR_LOGGER) {
+        if ((self::$type & self::TYPE_PSR_LOGGER) > 0) {
             $context = [
                 'file' => $backtrace[0]['file'],
                 'line' => $backtrace[0]['line'],
@@ -184,21 +156,37 @@ class Deprecation
 
             self::$logger->notice($message, $context);
         }
+
+        if (! ((self::$type & self::TYPE_TRIGGER_ERROR) > 0)) {
+            return;
+        }
+
+        $message .= sprintf(
+            ' (%s:%d called by %s:%d, %s, package %s)',
+            basename($backtrace[0]['file']),
+            $backtrace[0]['line'],
+            basename($backtrace[1]['file']),
+            $backtrace[1]['line'],
+            $link,
+            $package
+        );
+
+        @trigger_error($message, E_USER_DEPRECATED);
+    }
+
+    public static function enableTrackingDeprecations(): void
+    {
+        self::$type |= self::TYPE_TRACK_DEPRECATIONS;
     }
 
     public static function enableWithTriggerError(): void
     {
-        self::$type = self::TYPE_TRIGGER_ERROR;
-    }
-
-    public static function enableWithSuppressedTriggerError(): void
-    {
-        self::$type = self::TYPE_TRIGGER_SUPPRESSED_ERROR;
+        self::$type |= self::TYPE_TRIGGER_ERROR;
     }
 
     public static function enableWithPsrLogger(LoggerInterface $logger): void
     {
-        self::$type   = self::TYPE_PSR_LOGGER;
+        self::$type  |= self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
 
