@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Doctrine\Deprecations;
 
+use DeprecationTests\Foo;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
+use Doctrine\Foo\Baz;
 use PHPUnit\Framework\Error\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -185,7 +187,44 @@ class DeprecationTest extends TestCase
         $this->assertEquals(['https://github.com/doctrine/orm/issue/1234' => 1], Deprecation::getTriggeredDeprecations());
     }
 
-    public function testDeprecationCalledFromOutside(): void
+    public function testDeprecationIfCalledFromOutside(): void
+    {
+        Deprecation::enableWithTriggerError();
+
+        try {
+            Foo::triggerDependencyWithDeprecation();
+
+            $this->fail('Not expected to get here');
+        } catch (Throwable $e) {
+            $this->assertEquals(
+                'Bar::oldFunc() is deprecated, use Bar::newFunc() instead. (Bar.php:16 called by Foo.php:14, https://github.com/doctrine/foo, package doctrine/foo)',
+                $e->getMessage()
+            );
+
+            $this->assertEquals(['https://github.com/doctrine/foo' => 1], Deprecation::getTriggeredDeprecations());
+        }
+    }
+
+    public function testDeprecationIfCalledFromOutsideNotTriggeringFromInside(): void
+    {
+        Deprecation::enableWithTriggerError();
+
+        Foo::triggerDependencyWithDeprecationFromInside();
+
+        $this->assertEquals(0, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
+    public function testDeprecationIfCalledFromOutsideNotTriggeringFromInsideClass(): void
+    {
+        Deprecation::enableWithTriggerError();
+
+        $baz = new Baz();
+        $baz->usingOldFunc();
+
+        $this->assertEquals(0, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
+    public function testDeprecationCalledFromOutsideInRoot(): void
     {
         Deprecation::enableWithTriggerError();
 
