@@ -108,15 +108,15 @@ class Deprecation
         // dependency and the caller is not a file in that package.
         // When $package is installed as a root package, then this deprecation
         // is always ignored
-        if (
-            strpos($backtrace[0]['file'], '/vendor/' . $package . '/') === false &&
-            strpos($backtrace[1]['file'], '/tests/') !== false
-        ) {
-            return;
-        }
+        // first check that the caller is not from a tests folder, in which case we always let deprecations pass
+        if (strpos($backtrace[1]['file'], '/tests/') === false) {
+            if (strpos($backtrace[0]['file'], '/vendor/' . $package . '/') === false) {
+                return;
+            }
 
-        if (strpos($backtrace[1]['file'], '/vendor/' . $package . '/') !== false) {
-            return;
+            if (strpos($backtrace[1]['file'], '/vendor/' . $package . '/') !== false) {
+                return;
+            }
         }
 
         if (array_key_exists($link, self::$ignoredLinks)) {

@@ -20,8 +20,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "DeprecationTests\\": "tests/fixtures/src",
-            "Doctrine\\Foo\\": "tests/fixtures/vendor/doctrine/foo"
+            "DeprecationTests\\": "test_fixtures/src",
+            "Doctrine\\Foo\\": "test_fixtures/vendor/doctrine/foo"
         }
     }
 }
