@@ -4,7 +4,7 @@ A small (side-effect free by default) layer on top of
 `trigger_error(E_USER_DEPRECATED)` or PSR-3 logging.
 
 - no side-effects by default, making it a perfect fit for libraries that don't know how the error handler works they operate under
-- options to avoid having to rely on global state entirely with PSR-3 logging
+- options to avoid having to rely on error handlers global state by using PSR-3 logging
 - deduplicate deprecation messages to avoid excessive triggering and reduce overhead
 
 We recommend to collect Deprecations using a PSR logger instead of relying on
@@ -25,7 +25,7 @@ messages.
 \Doctrine\Deprecations\Deprecation::enableWithTriggerError();
 ```
 
-If you only want to enable depreaction tracking, without logging or calling `trigger_error` then call:
+If you only want to enable deprecation tracking, without logging or calling `trigger_error` then call:
 
 ```php
 \Doctrine\Deprecations\Deprecation::enableTrackingDeprecations();
@@ -41,7 +41,7 @@ foreach ($deprecations as $identifier => $count) {
 }
 ```
 
-### Supressing Specifc Deprecations
+### Suppressing Specific Deprecations
 
 Disable triggering about specific deprecations:
 
