@@ -31,7 +31,8 @@ If you only want to enable deprecation tracking, without logging or calling `tri
 \Doctrine\Deprecations\Deprecation::enableTrackingDeprecations();
 ```
 
-Access is provided to all triggered deprecations and their individual count:
+Tracking is enabled with all three modes and provides access to all triggered
+deprecations and their individual count:
 
 ```php
 $deprecations = \Doctrine\Deprecations\Deprecation::getTriggeredDeprecations();
