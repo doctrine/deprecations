@@ -7,17 +7,16 @@ namespace Doctrine\Deprecations;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use PHPUnit\Framework\TestCase;
 
+use function set_error_handler;
+
 class VerifyDeprecationsTest extends TestCase
 {
     use VerifyDeprecations;
 
-    /**
-     * @before
-     */
-    public function setUpDisableDeprecations(): void
+    public function setUp(): void
     {
-        // prevent PHPUnit from throwing Deprecation exception in case trigger_error was enabled before
-        Deprecation::disable();
+        set_error_handler(static function (): void {
+        });
     }
 
     public function testExpectDeprecationWithIdentifier(): void
