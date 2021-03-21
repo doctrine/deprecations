@@ -125,12 +125,14 @@ class Deprecation
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
-        if (strpos($backtrace[1]['file'], '/tests/') === false) {
-            if (strpos($backtrace[0]['file'], '/vendor/' . $package . '/') === false) {
+        if (strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
+            $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package . DIRECTORY_SEPARATOR;
+
+            if (strpos($backtrace[0]['file'], $path) === false) {
                 return;
             }
 
-            if (strpos($backtrace[1]['file'], '/vendor/' . $package . '/') !== false) {
+            if (strpos($backtrace[1]['file'], $path) !== false) {
                 return;
             }
         }
