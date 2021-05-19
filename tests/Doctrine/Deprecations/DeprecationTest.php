@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Doctrine\Deprecations;
 
 use DeprecationTests\Foo;
+use DeprecationTests\IgnoringDeprecations;
 use DeprecationTests\RootDeprecation;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use Doctrine\Foo\Baz;
@@ -247,5 +248,15 @@ class DeprecationTest extends TestCase
         RootDeprecation::run();
 
         $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
+    public function testRunningCodeTemporarilyIgnoringDeprecations(): void
+    {
+        Deprecation::enableWithTriggerError();
+
+        $this->expectNoDeprecationWithIdentifier('ignored-deprecation');
+
+        IgnoringDeprecations::run();
+        IgnoringDeprecations::runNested();
     }
 }

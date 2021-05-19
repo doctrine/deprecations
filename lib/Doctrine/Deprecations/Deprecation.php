@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 
 use function array_key_exists;
 use function array_reduce;
+use function assert;
 use function debug_backtrace;
 use function sprintf;
 use function strpos;
@@ -61,6 +62,9 @@ class Deprecation
     /** @var bool */
     private static $deduplication = true;
 
+    /** @var int */
+    private static $levelsIgnored = 0;
+
     /**
      * Trigger a deprecation for the given package and identfier.
      *
@@ -72,7 +76,7 @@ class Deprecation
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
-        if (self::$type === self::TYPE_NONE) {
+        if (! self::trackDeprecations()) {
             return;
         }
 
@@ -108,7 +112,7 @@ class Deprecation
      * This deprecation method assumes that you are using Composer to install
      * the dependency and are using the default /vendor/ folder and not a
      * Composer plugin to change the install location. The assumption is also
-     * that $package is the exact composer packge name.
+     * that $package is the exact composer package name.
      *
      * Compared to {@link trigger()} this method causes some overhead when
      * deprecation tracking is enabled even during deduplication, because it
@@ -118,7 +122,7 @@ class Deprecation
      */
     public static function triggerIfCalledFromOutside(string $package, string $link, string $message, ...$args): void
     {
-        if (self::$type === self::TYPE_NONE) {
+        if (! self::trackDeprecations()) {
             return;
         }
 
@@ -154,6 +158,24 @@ class Deprecation
         $message = sprintf($message, ...$args);
 
         self::delegateTriggerToBackend($message, $backtrace, $link, $package);
+    }
+
+    /**
+     * Runs a callable ignoring all deprecations that are triggered while
+     * running the callback. The callback takes no arguments.
+     *
+     * @return mixed Returns the return value of the callback
+     */
+    public static function runIgnoringDeprecations(callable $callable)
+    {
+        try {
+            self::$levelsIgnored++;
+
+            return $callable();
+        } finally {
+            self::$levelsIgnored--;
+            assert(self::$levelsIgnored >= 0);
+        }
     }
 
     /**
@@ -262,5 +284,11 @@ class Deprecation
     public static function getTriggeredDeprecations(): array
     {
         return self::$ignoredLinks;
+    }
+
+    private static function trackDeprecations(): bool
+    {
+        return self::$type !== self::TYPE_NONE &&
+            self::$levelsIgnored === 0;
     }
 }
