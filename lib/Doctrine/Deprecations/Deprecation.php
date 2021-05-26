@@ -243,7 +243,7 @@ class Deprecation
     public static function ignoreDeprecations(string ...$links): void
     {
         foreach ($links as $link) {
-            self::$ignoredLinks[$link] = 0;
+            self::$ignoredLinks[$link] = 1;
         }
     }
 
