@@ -207,7 +207,7 @@ class DeprecationTest extends TestCase
         Deprecation::enableWithTriggerError();
 
         $this->expectErrorHandler(
-            'Bar::oldFunc() is deprecated, use Bar::newFunc() instead. (Bar.php:16 called by Foo.php:14, https://github.com/doctrine/foo, package doctrine/foo)',
+            'Bar::oldFunc() is deprecated, use Bar::newFunc() instead. (Bar.php:%d called by Foo.php:14, https://github.com/doctrine/foo, package doctrine/foo)',
             'https://github.com/doctrine/foo'
         );
 
