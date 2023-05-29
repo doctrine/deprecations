@@ -248,4 +248,36 @@ class DeprecationTest extends TestCase
 
         $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
     }
+
+    public function testDeprecationTrackByEnv(): void
+    {
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue(null);
+
+        Deprecation::trigger('Foo', 'link', 'message');
+        $this->assertSame(0, Deprecation::getUniqueTriggeredDeprecationsCount());
+
+        $reflectionProperty->setValue(null);
+        $_SERVER['DOCTRINE_DEPRECATIONS'] = 'track';
+
+        Deprecation::trigger('Foo', __METHOD__, 'message');
+        $this->assertSame(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
+    public function testDeprecationTriggerByEnv(): void
+    {
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue(null);
+        $_ENV['DOCTRINE_DEPRECATIONS'] = 'trigger';
+
+        $this->expectErrorHandler(
+            'message (DeprecationTest.php:%d called by TestCase.php:%d, ' . __METHOD__ . ', package Foo)',
+            __METHOD__
+        );
+
+        Deprecation::trigger('Foo', __METHOD__, 'message');
+        $this->assertSame(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
 }
