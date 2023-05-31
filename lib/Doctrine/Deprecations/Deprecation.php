@@ -46,8 +46,8 @@ class Deprecation
     private const TYPE_TRIGGER_ERROR      = 2;
     private const TYPE_PSR_LOGGER         = 4;
 
-    /** @var int */
-    private static $type = self::TYPE_NONE;
+    /** @var self::TYPE_*|null */
+    private static $type;
 
     /** @var LoggerInterface|null */
     private static $logger;
@@ -72,7 +72,9 @@ class Deprecation
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
-        if (self::$type === self::TYPE_NONE) {
+        $type = self::$type ?? self::getTypeFromEnv();
+
+        if ($type === self::TYPE_NONE) {
             return;
         }
 
@@ -118,7 +120,9 @@ class Deprecation
      */
     public static function triggerIfCalledFromOutside(string $package, string $link, string $message, ...$args): void
     {
-        if (self::$type === self::TYPE_NONE) {
+        $type = self::$type ?? self::getTypeFromEnv();
+
+        if ($type === self::TYPE_NONE) {
             return;
         }
 
@@ -161,7 +165,9 @@ class Deprecation
      */
     private static function delegateTriggerToBackend(string $message, array $backtrace, string $link, string $package): void
     {
-        if ((self::$type & self::TYPE_PSR_LOGGER) > 0) {
+        $type = self::$type ?? self::getTypeFromEnv();
+
+        if (($type & self::TYPE_PSR_LOGGER) > 0) {
             $context = [
                 'file' => $backtrace[0]['file'],
                 'line' => $backtrace[0]['line'],
@@ -172,7 +178,7 @@ class Deprecation
             self::$logger->notice($message, $context);
         }
 
-        if (! ((self::$type & self::TYPE_TRIGGER_ERROR) > 0)) {
+        if (! (($type & self::TYPE_TRIGGER_ERROR) > 0)) {
             return;
         }
 
@@ -262,5 +268,27 @@ class Deprecation
     public static function getTriggeredDeprecations(): array
     {
         return self::$ignoredLinks;
+    }
+
+    /**
+     * @return self::TYPE_*
+     */
+    private static function getTypeFromEnv(): int
+    {
+        switch ($_SERVER['DOCTRINE_DEPRECATIONS'] ?? $_ENV['DOCTRINE_DEPRECATIONS'] ?? null) {
+            case 'trigger':
+                self::$type = self::TYPE_TRIGGER_ERROR;
+                break;
+
+            case 'track':
+                self::$type = self::TYPE_TRACK_DEPRECATIONS;
+                break;
+
+            default:
+                self::$type = self::TYPE_NONE;
+                break;
+        }
+
+        return self::$type;
     }
 }
