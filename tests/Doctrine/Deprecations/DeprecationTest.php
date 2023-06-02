@@ -29,7 +29,7 @@ class DeprecationTest extends TestCase
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
 
-        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredLinksCount');
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'triggeredDeprecations');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
 
@@ -200,6 +200,23 @@ class DeprecationTest extends TestCase
 
         $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
         $this->assertEquals(['https://github.com/doctrine/orm/issue/1234' => 1], Deprecation::getTriggeredDeprecations());
+    }
+
+    public function testDeprecationWithIgnoredLink(): void
+    {
+        Deprecation::enableWithTriggerError();
+        Deprecation::ignoreDeprecations('https://github.com/doctrine/orm/issue/1234');
+
+        Deprecation::trigger(
+            'doctrine/orm',
+            'https://github.com/doctrine/orm/issue/1234',
+            'this is deprecated %s %d',
+            'foo',
+            1234
+        );
+
+        $this->assertEquals(0, Deprecation::getUniqueTriggeredDeprecationsCount());
+        $this->assertEquals([], Deprecation::getTriggeredDeprecations());
     }
 
     public function testDeprecationIfCalledFromOutside(): void
