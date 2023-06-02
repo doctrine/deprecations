@@ -46,7 +46,7 @@ class Deprecation
     private const TYPE_TRIGGER_ERROR      = 2;
     private const TYPE_PSR_LOGGER         = 4;
 
-    /** @var self::TYPE_*|null */
+    /** @var int-mask-of<self::TYPE_*>|null */
     private static $type;
 
     /** @var LoggerInterface|null */
@@ -271,7 +271,7 @@ class Deprecation
     }
 
     /**
-     * @return self::TYPE_*
+     * @return int-mask-of<self::TYPE_*>
      */
     private static function getTypeFromEnv(): int
     {
