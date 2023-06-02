@@ -12,6 +12,7 @@
         "phpstan/phpstan": "1.4.10 || 1.10.15",
         "phpstan/phpstan-phpunit": "^1.0",
         "phpunit/phpunit": "^7.5 || ^8.5 || ^9.5",
+        "psalm/plugin-phpunit": "0.18.4",
         "psr/log": "^1 || ^2 || ^3",
         "vimeo/psalm": "4.30.0 || 5.12.0"
     },
