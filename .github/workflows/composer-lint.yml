@@ -3,13 +3,13 @@ name: "Composer Lint"
 on:
   pull_request:
     branches:
-      - "master"
+      - "*.x"
     paths:
       - .github/workflows/composer-lint.yml
       - composer.json
   push:
     branches:
-      - "master"
+      - "*.x"
     paths:
       - .github/workflows/composer-lint.yml
       - composer.json
