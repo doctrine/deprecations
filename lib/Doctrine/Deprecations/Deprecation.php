@@ -56,7 +56,7 @@ class Deprecation
     private static $ignoredPackages = [];
 
     /** @var array<string,int> */
-    private static $ignoredLinks = [];
+    private static $ignoredLinksCount = [];
 
     /** @var bool */
     private static $deduplication = true;
@@ -78,13 +78,13 @@ class Deprecation
             return;
         }
 
-        if (array_key_exists($link, self::$ignoredLinks)) {
-            self::$ignoredLinks[$link]++;
+        if (array_key_exists($link, self::$ignoredLinksCount)) {
+            self::$ignoredLinksCount[$link]++;
         } else {
-            self::$ignoredLinks[$link] = 1;
+            self::$ignoredLinksCount[$link] = 1;
         }
 
-        if (self::$deduplication === true && self::$ignoredLinks[$link] > 1) {
+        if (self::$deduplication === true && self::$ignoredLinksCount[$link] > 1) {
             return;
         }
 
@@ -141,13 +141,13 @@ class Deprecation
             }
         }
 
-        if (array_key_exists($link, self::$ignoredLinks)) {
-            self::$ignoredLinks[$link]++;
+        if (array_key_exists($link, self::$ignoredLinksCount)) {
+            self::$ignoredLinksCount[$link]++;
         } else {
-            self::$ignoredLinks[$link] = 1;
+            self::$ignoredLinksCount[$link] = 1;
         }
 
-        if (self::$deduplication === true && self::$ignoredLinks[$link] > 1) {
+        if (self::$deduplication === true && self::$ignoredLinksCount[$link] > 1) {
             return;
         }
 
@@ -236,8 +236,8 @@ class Deprecation
         self::$logger        = null;
         self::$deduplication = true;
 
-        foreach (self::$ignoredLinks as $link => $count) {
-            self::$ignoredLinks[$link] = 0;
+        foreach (self::$ignoredLinksCount as $link => $count) {
+            self::$ignoredLinksCount[$link] = 0;
         }
     }
 
@@ -249,13 +249,13 @@ class Deprecation
     public static function ignoreDeprecations(string ...$links): void
     {
         foreach ($links as $link) {
-            self::$ignoredLinks[$link] = 0;
+            self::$ignoredLinksCount[$link] = 0;
         }
     }
 
     public static function getUniqueTriggeredDeprecationsCount(): int
     {
-        return array_reduce(self::$ignoredLinks, static function (int $carry, int $count) {
+        return array_reduce(self::$ignoredLinksCount, static function (int $carry, int $count) {
             return $carry + $count;
         }, 0);
     }
@@ -267,7 +267,7 @@ class Deprecation
      */
     public static function getTriggeredDeprecations(): array
     {
-        return self::$ignoredLinks;
+        return self::$ignoredLinksCount;
     }
 
     /**

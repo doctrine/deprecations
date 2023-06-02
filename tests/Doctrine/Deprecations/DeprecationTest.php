@@ -29,7 +29,7 @@ class DeprecationTest extends TestCase
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
 
-        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredLinks');
+        $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredLinksCount');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
 
