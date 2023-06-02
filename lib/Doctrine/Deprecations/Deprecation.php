@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 
 use function array_key_exists;
 use function array_reduce;
+use function assert;
 use function debug_backtrace;
 use function sprintf;
 use function strpos;
@@ -174,6 +175,8 @@ class Deprecation
                 'package' => $package,
                 'link' => $link,
             ];
+
+            assert(self::$logger !== null);
 
             self::$logger->notice($message, $context);
         }
