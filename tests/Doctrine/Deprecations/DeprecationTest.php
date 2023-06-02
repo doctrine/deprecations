@@ -56,12 +56,14 @@ class DeprecationTest extends TestCase
 
     public function expectErrorHandler(string $expectedMessage, string $identifier, int $times = 1): void
     {
-        set_error_handler(function ($type, $message) use ($expectedMessage, $identifier, $times): void {
+        set_error_handler(function ($type, $message) use ($expectedMessage, $identifier, $times): bool {
             $this->assertStringMatchesFormat(
                 $expectedMessage,
                 $message
             );
             $this->assertEquals([$identifier => $times], Deprecation::getTriggeredDeprecations());
+
+            return false;
         });
     }
 
