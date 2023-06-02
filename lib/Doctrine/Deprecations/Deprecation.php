@@ -137,7 +137,7 @@ class Deprecation
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
-        if (strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
+        if (isset($backtrace[1]['file'], $backtrace[0]['file']) && strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
             $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package . DIRECTORY_SEPARATOR;
 
             if (strpos($backtrace[0]['file'], $path) === false) {
@@ -173,7 +173,7 @@ class Deprecation
     }
 
     /**
-     * @param array<mixed> $backtrace
+     * @param list<array{function: string, line?: int, file?: string, class?: class-string, type?: string, args?: mixed[], object?: object}> $backtrace
      */
     private static function delegateTriggerToBackend(string $message, array $backtrace, string $link, string $package): void
     {
@@ -181,8 +181,8 @@ class Deprecation
 
         if (($type & self::TYPE_PSR_LOGGER) > 0) {
             $context = [
-                'file' => $backtrace[0]['file'],
-                'line' => $backtrace[0]['line'],
+                'file' => $backtrace[0]['file'] ?? null,
+                'line' => $backtrace[0]['line'] ?? null,
                 'package' => $package,
                 'link' => $link,
             ];
@@ -198,10 +198,10 @@ class Deprecation
 
         $message .= sprintf(
             ' (%s:%d called by %s:%d, %s, package %s)',
-            self::basename($backtrace[0]['file']),
-            $backtrace[0]['line'],
-            self::basename($backtrace[1]['file']),
-            $backtrace[1]['line'],
+            self::basename($backtrace[0]['file'] ?? 'native code'),
+            $backtrace[0]['line'] ?? 0,
+            self::basename($backtrace[1]['file'] ?? 'native code'),
+            $backtrace[1]['line'] ?? 0,
             $link,
             $package
         );
