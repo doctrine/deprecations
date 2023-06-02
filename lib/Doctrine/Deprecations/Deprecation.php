@@ -72,7 +72,7 @@ class Deprecation
      * deprecation. It is additionally used to de-duplicate the trigger of the
      * same deprecation during a request.
      *
-     * @param mixed $args
+     * @param float|int|string $args
      */
     public static function trigger(string $package, string $link, string $message, ...$args): void
     {
@@ -124,7 +124,7 @@ class Deprecation
      * deprecation tracking is enabled even during deduplication, because it
      * needs to call {@link debug_backtrace()}
      *
-     * @param mixed $args
+     * @param float|int|string $args
      */
     public static function triggerIfCalledFromOutside(string $package, string $link, string $message, ...$args): void
     {
