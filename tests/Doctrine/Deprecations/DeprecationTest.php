@@ -9,7 +9,6 @@ use DeprecationTests\RootDeprecation;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use Doctrine\Foo\Baz;
 use PHPUnit\Framework\Error\Deprecated;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use ReflectionProperty;
@@ -56,12 +55,14 @@ class DeprecationTest extends TestCase
 
     public function expectErrorHandler(string $expectedMessage, string $identifier, int $times = 1): void
     {
-        set_error_handler(function ($type, $message) use ($expectedMessage, $identifier, $times): void {
+        set_error_handler(function ($type, $message) use ($expectedMessage, $identifier, $times): bool {
             $this->assertStringMatchesFormat(
                 $expectedMessage,
                 $message
             );
             $this->assertEquals([$identifier => $times], Deprecation::getTriggeredDeprecations());
+
+            return false;
         });
     }
 
@@ -152,7 +153,7 @@ class DeprecationTest extends TestCase
         }
     }
 
-    public function expectDeprecationMock(string $message, string $identifier, string $package): MockObject
+    public function expectDeprecationMock(string $message, string $identifier, string $package): LoggerInterface
     {
         $mock = $this->createMock(LoggerInterface::class);
         $mock->method('notice')->with($message, $this->callback(function ($context) use ($identifier, $package) {
