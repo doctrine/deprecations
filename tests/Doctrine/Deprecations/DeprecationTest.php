@@ -25,7 +25,7 @@ class DeprecationTest extends TestCase
 
     public function setUp(): void
     {
-        // reset the global state of Deprecation class accross tests
+        // reset the global state of Deprecation class across tests
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredPackages');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
@@ -33,6 +33,8 @@ class DeprecationTest extends TestCase
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'triggeredDeprecations');
         $reflectionProperty->setAccessible(true);
         $reflectionProperty->setValue([]);
+
+        Deprecation::disable();
 
         Deprecation::enableTrackingDeprecations();
     }
