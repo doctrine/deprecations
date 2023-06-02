@@ -1,9 +1,14 @@
 parameters:
-    level: 6
+    level: 9
     paths:
         - lib
         - tests
         - test_fixtures
+    ignoreErrors:
+        # False positive due to https://github.com/phpstan/phpstan/issues/9384
+        -
+            message: '/^Static property Doctrine\\Deprecations\\Deprecation::\$type \(int<0, 7>\|null\) does not accept int\.$/'
+            path: lib/Doctrine/Deprecations/Deprecation.php
 
 includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon
