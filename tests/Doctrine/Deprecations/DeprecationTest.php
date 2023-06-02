@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Doctrine\Deprecations;
 
+use DeprecationTests\ConstructorDeprecation;
 use DeprecationTests\Foo;
 use DeprecationTests\RootDeprecation;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
@@ -11,6 +12,7 @@ use Doctrine\Foo\Baz;
 use PHPUnit\Framework\Error\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use ReflectionClass;
 use ReflectionProperty;
 use Throwable;
 
@@ -296,6 +298,20 @@ class DeprecationTest extends TestCase
         );
 
         Deprecation::trigger('Foo', __METHOD__, 'message');
+        $this->assertSame(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
+    public function testDeprecationTriggeredFromNativeCode(): void
+    {
+        $ref = new ReflectionClass(ConstructorDeprecation::class);
+
+        Deprecation::enableWithTriggerError();
+        $this->expectErrorHandler(
+            'This constructor is deprecated. (ConstructorDeprecation.php:%d called by native code:0, https://github.com/doctrine/deprecations/issues/44, package doctrine/bar)',
+            'https://github.com/doctrine/deprecations/issues/44'
+        );
+
+        $ref->newInstance();
         $this->assertSame(1, Deprecation::getUniqueTriggeredDeprecationsCount());
     }
 }
