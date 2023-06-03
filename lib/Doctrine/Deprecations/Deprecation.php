@@ -225,16 +225,19 @@ class Deprecation
 
     public static function enableTrackingDeprecations(): void
     {
+        self::$type  = self::$type ?? 0;
         self::$type |= self::TYPE_TRACK_DEPRECATIONS;
     }
 
     public static function enableWithTriggerError(): void
     {
+        self::$type  = self::$type ?? 0;
         self::$type |= self::TYPE_TRIGGER_ERROR;
     }
 
     public static function enableWithPsrLogger(LoggerInterface $logger): void
     {
+        self::$type   = self::$type ?? 0;
         self::$type  |= self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
