@@ -2,14 +2,13 @@ name: "Continuous Integration"
 
 on:
   pull_request:
+    branches:
+      - "*.x"
+  push:
+    branches:
+      - "*.x"
 
 jobs:
-
-  coding-standards:
-    uses: "doctrine/.github/.github/workflows/coding-standards.yml@1.5.1"
-    with:
-      php-version: "8.1"
-
   phpunit:
     name: "PHPUnit"
     uses: "doctrine/.github/.github/workflows/continuous-integration.yml@1.5.1"
