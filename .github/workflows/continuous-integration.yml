@@ -4,9 +4,23 @@ on:
   pull_request:
     branches:
       - "*.x"
+    paths:
+      - .github/workflows/continuous-integration.yml
+      - composer.*
+      - lib/**
+      - phpunit.xml.dist
+      - test_fixtures/**
+      - tests/**
   push:
     branches:
       - "*.x"
+    paths:
+      - .github/workflows/continuous-integration.yml
+      - composer.*
+      - lib/**
+      - phpunit.xml.dist
+      - test_fixtures/**
+      - tests/**
 
 jobs:
   phpunit:
