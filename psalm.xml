@@ -11,6 +11,7 @@
     <projectFiles>
         <directory name="lib/Doctrine/Deprecations" />
         <directory name="tests/Doctrine/Deprecations" />
+        <directory name="test_fixtures" />
         <ignoreFiles>
             <directory name="vendor" />
         </ignoreFiles>
