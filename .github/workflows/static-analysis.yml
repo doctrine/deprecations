@@ -10,7 +10,7 @@ on:
       - lib/**
       - phpstan*
       - psalm*
-      - tests
+      - tests/**
   push:
     branches:
       - "*.x"
@@ -20,7 +20,7 @@ on:
       - lib/**
       - phpstan*
       - psalm*
-      - tests
+      - tests/**
 
 jobs:
   static-analysis:
