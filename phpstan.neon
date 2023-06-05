@@ -3,6 +3,7 @@ parameters:
     paths:
         - lib
         - tests
+        - test_fixtures
 
 includes:
     - vendor/phpstan/phpstan-phpunit/extension.neon
