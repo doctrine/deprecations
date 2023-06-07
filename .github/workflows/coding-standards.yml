@@ -1,0 +1,30 @@
+
+name: "Coding Standards"
+
+on:
+  pull_request:
+    branches:
+      - "*.x"
+    paths:
+      - .github/workflows/coding-standards.yml
+      - composer.*
+      - lib/**
+      - phpcs.xml.dist
+      - test_fixtures/**
+      - tests/**
+  push:
+    branches:
+      - "*.x"
+    paths:
+      - .github/workflows/coding-standards.yml
+      - composer.*
+      - lib/**
+      - phpcs.xml.dist
+      - test_fixtures/**
+      - tests/**
+
+jobs:
+  coding-standards:
+    uses: "doctrine/.github/.github/workflows/coding-standards.yml@3.0.0"
+    with:
+      php-version: "8.1"
