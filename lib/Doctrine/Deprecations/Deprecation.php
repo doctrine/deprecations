@@ -138,7 +138,7 @@ class Deprecation
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
         if (isset($backtrace[1]['file'], $backtrace[0]['file']) && strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
-            $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . $package . DIRECTORY_SEPARATOR;
+            $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . str_replace("/", DIRECTORY_SEPARATOR, $package) . DIRECTORY_SEPARATOR;
 
             if (strpos($backtrace[0]['file'], $path) === false) {
                 return;
