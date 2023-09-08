@@ -234,6 +234,8 @@ class DeprecationTest extends TestCase
         );
 
         Foo::triggerDependencyWithDeprecation();
+
+        $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
     }
 
     public function testDeprecationIfCalledFromOutsideNotTriggeringFromInside(): void
