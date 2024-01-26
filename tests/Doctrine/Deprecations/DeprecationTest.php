@@ -28,11 +28,11 @@ class DeprecationTest extends TestCase
         // reset the global state of Deprecation class across tests
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'ignoredPackages');
         $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue([]);
+        $reflectionProperty->setValue(null, []);
 
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'triggeredDeprecations');
         $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue([]);
+        $reflectionProperty->setValue(null, []);
 
         Deprecation::disable();
 
@@ -277,12 +277,12 @@ class DeprecationTest extends TestCase
     {
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
         $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue(null);
+        $reflectionProperty->setValue(null, null);
 
         Deprecation::trigger('Foo', 'link', 'message');
         $this->assertSame(0, Deprecation::getUniqueTriggeredDeprecationsCount());
 
-        $reflectionProperty->setValue(null);
+        $reflectionProperty->setValue(null, null);
         $_SERVER['DOCTRINE_DEPRECATIONS'] = 'track';
 
         Deprecation::trigger('Foo', __METHOD__, 'message');
@@ -293,7 +293,7 @@ class DeprecationTest extends TestCase
     {
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
         $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue(null);
+        $reflectionProperty->setValue(null, null);
         $_ENV['DOCTRINE_DEPRECATIONS'] = 'trigger';
 
         $this->expectErrorHandler(
