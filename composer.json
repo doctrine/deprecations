@@ -5,14 +5,17 @@
     "type": "library",
     "homepage": "https://www.doctrine-project.org/",
     "require": {
-        "php": "^7.1 || ^8.0"
+        "php": "^8.1"
     },
     "require-dev": {
         "doctrine/coding-standard": "^9 || ^12",
         "phpstan/phpstan": "1.4.10 || 2.0.3",
         "phpstan/phpstan-phpunit": "^1.0 || ^2",
-        "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6 || ^10.5 || ^11.5",
+        "phpunit/phpunit": "^10.5 || ^11.5",
         "psr/log": "^1 || ^2 || ^3"
+    },
+    "conflict": {
+        "phpunit/phpunit": "<=10.5 || >=12"
     },
     "suggest": {
         "psr/log": "Allows logging deprecations via PSR-3 logger implementation"
