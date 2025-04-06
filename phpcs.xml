@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
-<ruleset>
+<ruleset
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd"
+>
     <arg name="basepath" value="."/>
     <arg name="extensions" value="php"/>
     <arg name="parallel" value="80"/>
@@ -19,5 +22,11 @@
     <!-- Include full Doctrine Coding Standard -->
     <rule ref="Doctrine">
         <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint" />
+
+    </rule>
+
+    <!-- No way to work around this, we do not need how many arguments there are -->
+    <rule ref="SlevomatCodingStandard.PHP.OptimizedFunctionsWithoutUnpacking.UnpackingUsed">
+        <exclude-pattern>src/Deprecation.php</exclude-pattern>
     </rule>
 </ruleset>
