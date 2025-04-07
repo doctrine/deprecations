@@ -11,11 +11,11 @@
         "doctrine/coding-standard": "^9 || ^12 || ^13",
         "phpstan/phpstan": "1.4.10 || 2.1.11",
         "phpstan/phpstan-phpunit": "^1.0 || ^2",
-        "phpunit/phpunit": "^10.5 || ^11.5",
+        "phpunit/phpunit": "^10.5 || ^11.5 || ^12",
         "psr/log": "^1 || ^2 || ^3"
     },
     "conflict": {
-        "phpunit/phpunit": "<=10.5 || >=12"
+        "phpunit/phpunit": "<=10.5 || >=13"
     },
     "suggest": {
         "psr/log": "Allows logging deprecations via PSR-3 logger implementation"
