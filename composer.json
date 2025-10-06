@@ -8,10 +8,10 @@
         "php": "^7.1 || ^8.0"
     },
     "require-dev": {
-        "doctrine/coding-standard": "^9 || ^12 || ^13",
-        "phpstan/phpstan": "1.4.10 || 2.1.11",
+        "doctrine/coding-standard": "^9 || ^12 || ^14",
+        "phpstan/phpstan": "1.4.10 || 2.1.30",
         "phpstan/phpstan-phpunit": "^1.0 || ^2",
-        "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6 || ^10.5 || ^11.5 || ^12",
+        "phpunit/phpunit": "^7.5 || ^8.5 || ^9.6 || ^10.5 || ^11.5 || ^12.4",
         "psr/log": "^1 || ^2 || ^3"
     },
     "conflict": {
