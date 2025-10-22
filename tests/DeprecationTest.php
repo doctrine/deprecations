@@ -320,4 +320,87 @@ class DeprecationTest extends TestCase
             restore_error_handler();
         }
     }
+
+    public function testDeprecationWithoutDeduplicationByEnv(): void
+    {
+        $_ENV['DOCTRINE_DEPRECATIONS_DEDUPLICATION'] = 'false';
+
+        Deprecation::enableWithTriggerError();
+
+        $errorCount = 0;
+        set_error_handler(static function () use (&$errorCount): bool {
+            $errorCount++;
+
+            return true;
+        });
+
+        try {
+            // Trigger the same deprecation multiple times
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated from env test'
+            );
+
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated from env test'
+            );
+
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated from env test'
+            );
+
+            $this->assertEquals(3, $errorCount, 'Expected 3 deprecation warnings to be triggered');
+            $this->assertEquals(3, Deprecation::getUniqueTriggeredDeprecationsCount());
+        } finally {
+            restore_error_handler();
+            unset($_ENV['DOCTRINE_DEPRECATIONS_DEDUPLICATION']);
+        }
+    }
+
+    public function testDeprecationWithDeduplicationEnabledByDefault(): void
+    {
+        // Ensure no environment variable is set
+        unset($_ENV['DOCTRINE_DEPRECATIONS_DEDUPLICATION']);
+
+        Deprecation::enableWithTriggerError();
+
+        $errorCount = 0;
+        set_error_handler(static function () use (&$errorCount): bool {
+            $errorCount++;
+
+            return true;
+        });
+
+        try {
+            // Trigger the same deprecation multiple times
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated default test'
+            );
+
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated default test'
+            );
+
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/deprecations/issues/123',
+                'this is deprecated default test'
+            );
+
+            // With deduplication enabled (default), only first should trigger
+            $this->assertEquals(1, $errorCount);
+            $this->assertEquals(3, Deprecation::getUniqueTriggeredDeprecationsCount());
+        } finally {
+            restore_error_handler();
+        }
+    }
 }
