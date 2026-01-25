@@ -42,7 +42,7 @@ class DeprecationTest extends TestCase
         set_error_handler(function ($type, $message) use ($expectedMessage, $identifier, $times): bool {
             $this->assertStringMatchesFormat(
                 $expectedMessage,
-                $message
+                $message,
             );
             $this->assertEquals([$identifier => $times], Deprecation::getTriggeredDeprecations());
 
@@ -59,7 +59,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'this is deprecated foo 1234 (DeprecationTest.php:%d called by TestCase.php:%d, https://github.com/doctrine/deprecations/1234, package doctrine/orm)',
-                'https://github.com/doctrine/deprecations/1234'
+                'https://github.com/doctrine/deprecations/1234',
             );
 
             Deprecation::trigger(
@@ -67,7 +67,7 @@ class DeprecationTest extends TestCase
                 'https://github.com/doctrine/deprecations/1234',
                 'this is deprecated %s %d',
                 'foo',
-                1234
+                1234,
             );
 
             $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -77,7 +77,7 @@ class DeprecationTest extends TestCase
                 'https://github.com/doctrine/deprecations/1234',
                 'this is deprecated %s %d',
                 'foo',
-                1234
+                1234,
             );
 
             $this->assertEquals(2, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -94,7 +94,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'this is deprecated foo 2222 (DeprecationTest.php:%d called by TestCase.php:%d, https://github.com/doctrine/deprecations/2222, package doctrine/orm)',
-                'https://github.com/doctrine/deprecations/2222'
+                'https://github.com/doctrine/deprecations/2222',
             );
 
             Deprecation::trigger(
@@ -102,7 +102,7 @@ class DeprecationTest extends TestCase
                 'https://github.com/doctrine/deprecations/2222',
                 'this is deprecated %s %d',
                 'foo',
-                2222
+                2222,
             );
 
             $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -111,7 +111,7 @@ class DeprecationTest extends TestCase
             $this->expectErrorHandler(
                 'this is deprecated foo 2222 (DeprecationTest.php:%d called by TestCase.php:%d, https://github.com/doctrine/deprecations/2222, package doctrine/orm)',
                 'https://github.com/doctrine/deprecations/2222',
-                2
+                2,
             );
 
             Deprecation::trigger(
@@ -119,7 +119,7 @@ class DeprecationTest extends TestCase
                 'https://github.com/doctrine/deprecations/2222',
                 'this is deprecated %s %d',
                 'foo',
-                2222
+                2222,
             );
 
             $this->assertEquals(2, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -135,7 +135,7 @@ class DeprecationTest extends TestCase
             'https://github.com/doctrine/deprecations/1234',
             'this is deprecated %s %d',
             'foo',
-            1234
+            1234,
         );
         Deprecation::disable();
 
@@ -163,7 +163,7 @@ class DeprecationTest extends TestCase
         $mock = $this->expectDeprecationMock(
             'this is deprecated foo 1234',
             'https://github.com/doctrine/deprecations/2222',
-            'doctrine/orm'
+            'doctrine/orm',
         );
         Deprecation::enableWithPsrLogger($mock);
 
@@ -172,7 +172,7 @@ class DeprecationTest extends TestCase
             'https://github.com/doctrine/deprecations/2222',
             'this is deprecated %s %d',
             'foo',
-            1234
+            1234,
         );
     }
 
@@ -186,7 +186,7 @@ class DeprecationTest extends TestCase
             'https://github.com/doctrine/orm/issue/1234',
             'this is deprecated %s %d',
             'foo',
-            1234
+            1234,
         );
 
         $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -203,7 +203,7 @@ class DeprecationTest extends TestCase
             'https://github.com/doctrine/orm/issue/1234',
             'this is deprecated %s %d',
             'foo',
-            1234
+            1234,
         );
 
         $this->assertEquals(0, Deprecation::getUniqueTriggeredDeprecationsCount());
@@ -217,7 +217,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'Bar::oldFunc() is deprecated, use Bar::newFunc() instead. (Bar.php:%d called by Foo.php:14, https://github.com/doctrine/foo, package doctrine/foo)',
-                'https://github.com/doctrine/foo'
+                'https://github.com/doctrine/foo',
             );
 
             Foo::triggerDependencyWithDeprecation();
@@ -256,7 +256,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'this is deprecated foo 1234 (RootDeprecation.php:%d called by DeprecationTest.php:%d, https://github.com/doctrine/deprecations/4444, package doctrine/orm)',
-                'https://github.com/doctrine/deprecations/4444'
+                'https://github.com/doctrine/deprecations/4444',
             );
 
             RootDeprecation::run();
@@ -293,7 +293,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'message (DeprecationTest.php:%d called by TestCase.php:%d, ' . __METHOD__ . ', package Foo)',
-                __METHOD__
+                __METHOD__,
             );
 
             Deprecation::trigger('Foo', __METHOD__, 'message');
@@ -311,7 +311,7 @@ class DeprecationTest extends TestCase
         try {
             $this->expectErrorHandler(
                 'This constructor is deprecated. (ConstructorDeprecation.php:%d called by native code:0, https://github.com/doctrine/deprecations/issues/44, package doctrine/bar)',
-                'https://github.com/doctrine/deprecations/issues/44'
+                'https://github.com/doctrine/deprecations/issues/44',
             );
 
             $ref->newInstance();

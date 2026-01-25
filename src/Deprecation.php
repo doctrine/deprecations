@@ -43,28 +43,26 @@ use const E_USER_DEPRECATED;
  */
 class Deprecation
 {
-    private const TYPE_NONE               = 0;
-    private const TYPE_TRACK_DEPRECATIONS = 1;
-    private const TYPE_TRIGGER_ERROR      = 2;
-    private const TYPE_PSR_LOGGER         = 4;
+    private const int TYPE_NONE               = 0;
+    private const int TYPE_TRACK_DEPRECATIONS = 1;
+    private const int TYPE_TRIGGER_ERROR      = 2;
+    private const int TYPE_PSR_LOGGER         = 4;
 
     /** @var int-mask-of<self::TYPE_*>|null */
-    private static $type;
+    private static int|null $type = null;
 
-    /** @var LoggerInterface|null */
-    private static $logger;
+    private static LoggerInterface|null $logger = null;
 
     /** @var array<string,bool> */
-    private static $ignoredPackages = [];
+    private static array $ignoredPackages = [];
 
     /** @var array<string,int> */
-    private static $triggeredDeprecations = [];
+    private static array $triggeredDeprecations = [];
 
     /** @var array<string,bool> */
-    private static $ignoredLinks = [];
+    private static array $ignoredLinks = [];
 
-    /** @var bool */
-    private static $deduplication = true;
+    private static bool $deduplication = true;
 
     /**
      * Trigger a deprecation for the given package and identfier.
@@ -131,7 +129,7 @@ class Deprecation
         string $package,
         string $link,
         string $message,
-        float|int|string ...$args
+        float|int|string ...$args,
     ): void {
         $type = self::$type ?? self::getTypeFromEnv();
 
@@ -206,7 +204,7 @@ class Deprecation
             self::basename($backtrace[1]['file'] ?? 'native code'),
             $backtrace[1]['line'] ?? 0,
             $link,
-            $package
+            $package,
         );
 
         @trigger_error($message, E_USER_DEPRECATED);
@@ -228,19 +226,19 @@ class Deprecation
 
     public static function enableTrackingDeprecations(): void
     {
-        self::$type  = self::$type ?? self::getTypeFromEnv();
-        self::$type |= self::TYPE_TRACK_DEPRECATIONS;
+        self::$type ??= self::getTypeFromEnv();
+        self::$type  |= self::TYPE_TRACK_DEPRECATIONS;
     }
 
     public static function enableWithTriggerError(): void
     {
-        self::$type  = self::$type ?? self::getTypeFromEnv();
-        self::$type |= self::TYPE_TRIGGER_ERROR;
+        self::$type ??= self::getTypeFromEnv();
+        self::$type  |= self::TYPE_TRIGGER_ERROR;
     }
 
     public static function enableWithPsrLogger(LoggerInterface $logger): void
     {
-        self::$type   = self::$type ?? self::getTypeFromEnv();
+        self::$type ??= self::getTypeFromEnv();
         self::$type  |= self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
