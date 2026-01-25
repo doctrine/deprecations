@@ -11,8 +11,8 @@ use function array_reduce;
 use function assert;
 use function debug_backtrace;
 use function sprintf;
+use function str_contains;
 use function str_replace;
-use function strpos;
 use function strrpos;
 use function substr;
 use function trigger_error;
@@ -140,14 +140,14 @@ class Deprecation
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
-        if (isset($backtrace[1]['file'], $backtrace[0]['file']) && strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
+        if (isset($backtrace[1]['file'], $backtrace[0]['file']) && ! str_contains($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR)) {
             $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $package) . DIRECTORY_SEPARATOR;
 
-            if (strpos($backtrace[0]['file'], $path) === false) {
+            if (! str_contains($backtrace[0]['file'], $path)) {
                 return;
             }
 
-            if (strpos($backtrace[1]['file'], $path) !== false) {
+            if (str_contains($backtrace[1]['file'], $path)) {
                 return;
             }
         }
@@ -274,9 +274,7 @@ class Deprecation
 
     public static function getUniqueTriggeredDeprecationsCount(): int
     {
-        return array_reduce(self::$triggeredDeprecations, static function (int $carry, int $count) {
-            return $carry + $count;
-        }, 0);
+        return array_reduce(self::$triggeredDeprecations, static fn (int $carry, int $count) => $carry + $count, 0);
     }
 
     /**
@@ -292,19 +290,11 @@ class Deprecation
     /** @return int-mask-of<self::TYPE_*> */
     private static function getTypeFromEnv(): int
     {
-        switch ($_SERVER['DOCTRINE_DEPRECATIONS'] ?? $_ENV['DOCTRINE_DEPRECATIONS'] ?? null) {
-            case 'trigger':
-                self::$type = self::TYPE_TRIGGER_ERROR;
-                break;
-
-            case 'track':
-                self::$type = self::TYPE_TRACK_DEPRECATIONS;
-                break;
-
-            default:
-                self::$type = self::TYPE_NONE;
-                break;
-        }
+        self::$type = match ($_SERVER['DOCTRINE_DEPRECATIONS'] ?? $_ENV['DOCTRINE_DEPRECATIONS'] ?? null) {
+            'trigger' => self::TYPE_TRIGGER_ERROR,
+            'track' => self::TYPE_TRACK_DEPRECATIONS,
+            default => self::TYPE_NONE,
+        };
 
         return self::$type;
     }
