@@ -12,7 +12,7 @@
     <!-- Ignore warnings, show progress of the run and show sniff names -->
     <arg value="nps"/>
 
-    <config name="php_version" value="70100"/>
+    <config name="php_version" value="80400"/>
 
     <!-- Directories to be checked -->
     <file>src</file>
@@ -20,10 +20,7 @@
     <file>test_fixtures</file>
 
     <!-- Include full Doctrine Coding Standard -->
-    <rule ref="Doctrine">
-        <exclude name="SlevomatCodingStandard.TypeHints.PropertyTypeHint.MissingNativeTypeHint" />
-
-    </rule>
+    <rule ref="Doctrine" />
 
     <!-- No way to work around this, we do not need how many arguments there are -->
     <rule ref="SlevomatCodingStandard.PHP.OptimizedFunctionsWithoutUnpacking.UnpackingUsed">

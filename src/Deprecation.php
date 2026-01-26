@@ -11,8 +11,8 @@ use function array_reduce;
 use function assert;
 use function debug_backtrace;
 use function sprintf;
+use function str_contains;
 use function str_replace;
-use function strpos;
 use function strrpos;
 use function substr;
 use function trigger_error;
@@ -43,28 +43,26 @@ use const E_USER_DEPRECATED;
  */
 class Deprecation
 {
-    private const TYPE_NONE               = 0;
-    private const TYPE_TRACK_DEPRECATIONS = 1;
-    private const TYPE_TRIGGER_ERROR      = 2;
-    private const TYPE_PSR_LOGGER         = 4;
+    private const int TYPE_NONE               = 0;
+    private const int TYPE_TRACK_DEPRECATIONS = 1;
+    private const int TYPE_TRIGGER_ERROR      = 2;
+    private const int TYPE_PSR_LOGGER         = 4;
 
     /** @var int-mask-of<self::TYPE_*>|null */
-    private static $type;
+    private static int|null $type = null;
 
-    /** @var LoggerInterface|null */
-    private static $logger;
+    private static LoggerInterface|null $logger = null;
 
     /** @var array<string,bool> */
-    private static $ignoredPackages = [];
+    private static array $ignoredPackages = [];
 
     /** @var array<string,int> */
-    private static $triggeredDeprecations = [];
+    private static array $triggeredDeprecations = [];
 
     /** @var array<string,bool> */
-    private static $ignoredLinks = [];
+    private static array $ignoredLinks = [];
 
-    /** @var bool */
-    private static $deduplication = true;
+    private static bool $deduplication = true;
 
     /**
      * Trigger a deprecation for the given package and identfier.
@@ -131,7 +129,7 @@ class Deprecation
         string $package,
         string $link,
         string $message,
-        float|int|string ...$args
+        float|int|string ...$args,
     ): void {
         $type = self::$type ?? self::getTypeFromEnv();
 
@@ -142,14 +140,14 @@ class Deprecation
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
-        if (isset($backtrace[1]['file'], $backtrace[0]['file']) && strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
+        if (isset($backtrace[1]['file'], $backtrace[0]['file']) && ! str_contains($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR)) {
             $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $package) . DIRECTORY_SEPARATOR;
 
-            if (strpos($backtrace[0]['file'], $path) === false) {
+            if (! str_contains($backtrace[0]['file'], $path)) {
                 return;
             }
 
-            if (strpos($backtrace[1]['file'], $path) !== false) {
+            if (str_contains($backtrace[1]['file'], $path)) {
                 return;
             }
         }
@@ -206,7 +204,7 @@ class Deprecation
             self::basename($backtrace[1]['file'] ?? 'native code'),
             $backtrace[1]['line'] ?? 0,
             $link,
-            $package
+            $package,
         );
 
         @trigger_error($message, E_USER_DEPRECATED);
@@ -228,19 +226,19 @@ class Deprecation
 
     public static function enableTrackingDeprecations(): void
     {
-        self::$type  = self::$type ?? self::getTypeFromEnv();
-        self::$type |= self::TYPE_TRACK_DEPRECATIONS;
+        self::$type ??= self::getTypeFromEnv();
+        self::$type  |= self::TYPE_TRACK_DEPRECATIONS;
     }
 
     public static function enableWithTriggerError(): void
     {
-        self::$type  = self::$type ?? self::getTypeFromEnv();
-        self::$type |= self::TYPE_TRIGGER_ERROR;
+        self::$type ??= self::getTypeFromEnv();
+        self::$type  |= self::TYPE_TRIGGER_ERROR;
     }
 
     public static function enableWithPsrLogger(LoggerInterface $logger): void
     {
-        self::$type   = self::$type ?? self::getTypeFromEnv();
+        self::$type ??= self::getTypeFromEnv();
         self::$type  |= self::TYPE_PSR_LOGGER;
         self::$logger = $logger;
     }
@@ -276,9 +274,7 @@ class Deprecation
 
     public static function getUniqueTriggeredDeprecationsCount(): int
     {
-        return array_reduce(self::$triggeredDeprecations, static function (int $carry, int $count) {
-            return $carry + $count;
-        }, 0);
+        return array_reduce(self::$triggeredDeprecations, static fn (int $carry, int $count) => $carry + $count, 0);
     }
 
     /**
@@ -294,19 +290,11 @@ class Deprecation
     /** @return int-mask-of<self::TYPE_*> */
     private static function getTypeFromEnv(): int
     {
-        switch ($_SERVER['DOCTRINE_DEPRECATIONS'] ?? $_ENV['DOCTRINE_DEPRECATIONS'] ?? null) {
-            case 'trigger':
-                self::$type = self::TYPE_TRIGGER_ERROR;
-                break;
-
-            case 'track':
-                self::$type = self::TYPE_TRACK_DEPRECATIONS;
-                break;
-
-            default:
-                self::$type = self::TYPE_NONE;
-                break;
-        }
+        self::$type = match ($_SERVER['DOCTRINE_DEPRECATIONS'] ?? $_ENV['DOCTRINE_DEPRECATIONS'] ?? null) {
+            'trigger' => self::TYPE_TRIGGER_ERROR,
+            'track' => self::TYPE_TRACK_DEPRECATIONS,
+            default => self::TYPE_NONE,
+        };
 
         return self::$type;
     }

@@ -16,9 +16,7 @@ class VerifyDeprecationsTest extends TestCase
 
     public function setUp(): void
     {
-        set_error_handler(static function (): bool {
-            return false;
-        });
+        set_error_handler(static fn (): bool => false);
     }
 
     public function tearDown(): void
