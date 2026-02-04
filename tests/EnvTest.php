@@ -14,7 +14,6 @@ class EnvTest extends TestCase
         $_ENV['DOCTRINE_DEPRECATIONS'] = 'trigger';
         Deprecation::enableTrackingDeprecations();
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
-        $reflectionProperty->setAccessible(true);
         self::assertSame(1 | 2, $reflectionProperty->getValue());
         unset($_ENV['DOCTRINE_DEPRECATIONS']);
         $reflectionProperty->setValue(null, null);
