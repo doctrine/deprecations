@@ -4,6 +4,7 @@ parameters:
         - src
         - tests
         - test_fixtures
+    checkMissingOverrideMethodAttribute: true
     ignoreErrors:
         # False positive due to https://github.com/phpstan/phpstan/issues/9384
         -
