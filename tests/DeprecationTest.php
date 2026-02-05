@@ -9,6 +9,7 @@ use DeprecationTests\Foo;
 use DeprecationTests\RootDeprecation;
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
 use Doctrine\Foo\Baz;
+use Override;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use ReflectionClass;
@@ -21,6 +22,7 @@ class DeprecationTest extends TestCase
 {
     use VerifyDeprecations;
 
+    #[Override]
     public function setUp(): void
     {
         // reset the global state of Deprecation class across tests

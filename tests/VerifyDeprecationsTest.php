@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Doctrine\Deprecations;
 
 use Doctrine\Deprecations\PHPUnit\VerifyDeprecations;
+use Override;
 use PHPUnit\Framework\TestCase;
 
 use function restore_error_handler;
@@ -14,11 +15,13 @@ class VerifyDeprecationsTest extends TestCase
 {
     use VerifyDeprecations;
 
+    #[Override]
     public function setUp(): void
     {
         set_error_handler(static fn (): bool => false);
     }
 
+    #[Override]
     public function tearDown(): void
     {
         restore_error_handler();
