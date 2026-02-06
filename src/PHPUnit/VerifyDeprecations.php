@@ -18,28 +18,24 @@ trait VerifyDeprecations
     /** @var array<string,int> */
     private array $doctrineNoDeprecationsExpectations = [];
 
-    /** @final since 1.2 */
-    public function expectDeprecationWithIdentifier(string $identifier): void
+    final public function expectDeprecationWithIdentifier(string $identifier): void
     {
         $this->doctrineDeprecationsExpectations[$identifier] = Deprecation::getTriggeredDeprecations()[$identifier] ?? 0;
     }
 
-    /** @final since 1.2 */
-    public function expectNoDeprecationWithIdentifier(string $identifier): void
+    final public function expectNoDeprecationWithIdentifier(string $identifier): void
     {
         $this->doctrineNoDeprecationsExpectations[$identifier] = Deprecation::getTriggeredDeprecations()[$identifier] ?? 0;
     }
 
-    /** @final since 1.2 */
     #[Before]
-    public function enableDeprecationTracking(): void
+    final public function enableDeprecationTracking(): void
     {
         Deprecation::enableTrackingDeprecations();
     }
 
-    /** @final since 1.2 */
     #[After]
-    public function verifyDeprecationsAreTriggered(): void
+    final public function verifyDeprecationsAreTriggered(): void
     {
         foreach ($this->doctrineDeprecationsExpectations as $identifier => $expectation) {
             $actualCount = Deprecation::getTriggeredDeprecations()[$identifier] ?? 0;
