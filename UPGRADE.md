@@ -5,6 +5,12 @@ awareness about deprecated code][deprecation-policy].
 
 # Upgrade to 2.0
 
+## BC Break: Final classes and methods
+
+The class and methods that were marked as `@final` in the codebase are now
+declared as `final` using the native PHP keyword. This means that extending
+those classes or overriding those methods is an error.
+
 ## Added native type declarations
 
 Some type declarations that required recent PHP versions were added to the
