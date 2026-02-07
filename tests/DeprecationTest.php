@@ -146,12 +146,14 @@ class DeprecationTest extends TestCase
     public function expectDeprecationMock(string $message, string $identifier, string $package): LoggerInterface
     {
         $mock = $this->createMock(LoggerInterface::class);
-        $mock->method('notice')->with($message, $this->callback(function (array $context) use ($identifier, $package) {
-            $this->assertEquals($package, $context['package']);
-            $this->assertEquals($identifier, $context['link']);
+        $mock->expects($this->atLeastOnce())
+            ->method('notice')
+            ->with($message, $this->callback(function (array $context) use ($identifier, $package) {
+                $this->assertEquals($package, $context['package']);
+                $this->assertEquals($identifier, $context['link']);
 
-            return true;
-        }));
+                return true;
+            }));
 
         return $mock;
     }
