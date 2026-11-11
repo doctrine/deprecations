@@ -62,7 +62,7 @@ final class Deprecation
     /** @var array<string,bool> */
     private static array $ignoredLinks = [];
 
-    private static bool $deduplication = true;
+    private static bool|null $deduplication = null;
 
     /**
      * Trigger a deprecation for the given package and identfier.
@@ -93,7 +93,7 @@ final class Deprecation
             self::$triggeredDeprecations[$link] = 1;
         }
 
-        if (self::$deduplication === true && self::$triggeredDeprecations[$link] > 1) {
+        if ((self::$deduplication ?? self::getDeduplicationFromEnv()) === true && self::$triggeredDeprecations[$link] > 1) {
             return;
         }
 
@@ -162,7 +162,7 @@ final class Deprecation
             self::$triggeredDeprecations[$link] = 1;
         }
 
-        if (self::$deduplication === true && self::$triggeredDeprecations[$link] > 1) {
+        if ((self::$deduplication ?? self::getDeduplicationFromEnv()) === true && self::$triggeredDeprecations[$link] > 1) {
             return;
         }
 
@@ -252,7 +252,7 @@ final class Deprecation
     {
         self::$type          = self::TYPE_NONE;
         self::$logger        = null;
-        self::$deduplication = true;
+        self::$deduplication = null;
         self::$ignoredLinks  = [];
 
         foreach (self::$triggeredDeprecations as $link => $count) {
@@ -297,5 +297,16 @@ final class Deprecation
         };
 
         return self::$type;
+    }
+
+    private static function getDeduplicationFromEnv(): bool
+    {
+        $envValue = $_SERVER['DOCTRINE_DEPRECATIONS_DEDUPLICATION'] ?? $_ENV['DOCTRINE_DEPRECATIONS_DEDUPLICATION'] ?? null;
+
+        if ($envValue === 'false' || $envValue === '0') {
+            return self::$deduplication = false;
+        }
+
+        return self::$deduplication = true;
     }
 }
