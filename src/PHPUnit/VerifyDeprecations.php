@@ -13,10 +13,10 @@ use function sprintf;
 trait VerifyDeprecations
 {
     /** @var array<string,int> */
-    private $doctrineDeprecationsExpectations = [];
+    private array $doctrineDeprecationsExpectations = [];
 
     /** @var array<string,int> */
-    private $doctrineNoDeprecationsExpectations = [];
+    private array $doctrineNoDeprecationsExpectations = [];
 
     /** @final since 1.2 */
     public function expectDeprecationWithIdentifier(string $identifier): void
@@ -54,8 +54,8 @@ trait VerifyDeprecations
                 $actualCount > $expectation,
                 sprintf(
                     "Expected deprecation with identifier '%s' was not triggered by code executed in test.",
-                    $identifier
-                )
+                    $identifier,
+                ),
             );
         }
 
@@ -66,8 +66,8 @@ trait VerifyDeprecations
                 $actualCount === $expectation,
                 sprintf(
                     "Deprecation with identifier '%s' was triggered by code executed in test, but expected not to.",
-                    $identifier
-                )
+                    $identifier,
+                ),
             );
         }
     }

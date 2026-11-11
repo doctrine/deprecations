@@ -15,7 +15,7 @@ class RootDeprecation
             'https://github.com/doctrine/deprecations/4444',
             'this is deprecated %s %d',
             'foo',
-            1234
+            1234,
         );
     }
 }

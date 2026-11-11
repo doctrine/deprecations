@@ -13,7 +13,7 @@ class Bar
         Deprecation::triggerIfCalledFromOutside(
             'doctrine/foo',
             'https://github.com/doctrine/foo',
-            'Bar::oldFunc() is deprecated, use Bar::newFunc() instead.'
+            'Bar::oldFunc() is deprecated, use Bar::newFunc() instead.',
         );
     }
 
