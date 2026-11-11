@@ -14,6 +14,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionClass;
 use ReflectionProperty;
 
+use function basename;
 use function restore_error_handler;
 use function set_error_handler;
 
@@ -143,39 +144,51 @@ class DeprecationTest extends TestCase
         $this->assertEquals(['https://github.com/doctrine/deprecations/1234' => 0], Deprecation::getTriggeredDeprecations());
     }
 
-    public function expectDeprecationMock(string $message, string $identifier, string $package): LoggerInterface
-    {
-        $mock = $this->createMock(LoggerInterface::class);
-        $mock->expects($this->atLeastOnce())
-            ->method('notice')
-            ->with($message, $this->callback(function (array $context) use ($identifier, $package) {
-                $this->assertEquals($package, $context['package']);
-                $this->assertEquals($identifier, $context['link']);
-
-                return true;
-            }));
-
-        return $mock;
-    }
-
     public function testDeprecationWithPsrLogger(): void
     {
-        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/2222');
+        $this->expectDeprecationWithIdentifier('https://github.com/doctrine/deprecations/5555');
 
-        $mock = $this->expectDeprecationMock(
-            'this is deprecated foo 1234',
-            'https://github.com/doctrine/deprecations/2222',
-            'doctrine/orm',
-        );
+        $expectedLine = null;
+
+        $mock = $this->createMock(LoggerInterface::class);
+        $mock->expects($this->once())
+            ->method('notice')
+            ->with(
+                'this is deprecated foo 1234',
+                $this->callback(function (array $context) use (&$expectedLine): bool {
+                    $this->assertSame(__FILE__, $context['file']);
+                    $this->assertSame($expectedLine, $context['line']);
+                    $this->assertSame('doctrine/orm', $context['package']);
+                    $this->assertSame('https://github.com/doctrine/deprecations/5555', $context['link']);
+
+                    return true;
+                }),
+            );
         Deprecation::enableWithPsrLogger($mock);
 
-        Deprecation::trigger(
-            'doctrine/orm',
-            'https://github.com/doctrine/deprecations/2222',
-            'this is deprecated %s %d',
-            'foo',
-            1234,
-        );
+        $expectedLine = __LINE__ + 1;
+        RootDeprecation::runWithTrigger();
+    }
+
+    public function testDeprecationIfCalledFromOutsideWithPsrLogger(): void
+    {
+        $mock = $this->createMock(LoggerInterface::class);
+        $mock->expects($this->once())
+            ->method('notice')
+            ->with(
+                'Bar::oldFunc() is deprecated, use Bar::newFunc() instead.',
+                $this->callback(function (array $context): bool {
+                    $this->assertSame('Foo.php', basename($context['file']));
+                    $this->assertSame(14, $context['line']);
+                    $this->assertSame('doctrine/foo', $context['package']);
+                    $this->assertSame('https://github.com/doctrine/foo', $context['link']);
+
+                    return true;
+                }),
+            );
+        Deprecation::enableWithPsrLogger($mock);
+
+        Foo::triggerDependencyWithDeprecation();
     }
 
     public function testDeprecationWithIgnoredPackage(): void

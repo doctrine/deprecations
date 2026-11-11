@@ -179,9 +179,12 @@ class Deprecation
         $type = self::$type ?? self::getTypeFromEnv();
 
         if (($type & self::TYPE_PSR_LOGGER) > 0) {
+            // The first frame is the deprecated code that calls this method.
+            // The second frame is the code that uses the deprecated API, which
+            // is the code the logger should point to.
             $context = [
-                'file' => $backtrace[0]['file'] ?? null,
-                'line' => $backtrace[0]['line'] ?? null,
+                'file' => $backtrace[1]['file'] ?? null,
+                'line' => $backtrace[1]['line'] ?? null,
                 'package' => $package,
                 'link' => $link,
             ];
