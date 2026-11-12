@@ -19,6 +19,11 @@ class RootDeprecation
         );
     }
 
+    public static function runNested(): void
+    {
+        self::run();
+    }
+
     public static function runWithTrigger(): void
     {
         Deprecation::trigger(
