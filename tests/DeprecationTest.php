@@ -282,6 +282,13 @@ class DeprecationTest extends TestCase
         }
     }
 
+    public function testDeprecationCalledFromOutsideFromNestedCallInTests(): void
+    {
+        RootDeprecation::runNested();
+
+        $this->assertEquals(1, Deprecation::getUniqueTriggeredDeprecationsCount());
+    }
+
     public function testDeprecationTrackByEnv(): void
     {
         $reflectionProperty = new ReflectionProperty(Deprecation::class, 'type');
