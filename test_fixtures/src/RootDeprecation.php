@@ -18,4 +18,15 @@ class RootDeprecation
             1234,
         );
     }
+
+    public static function runWithTrigger(): void
+    {
+        Deprecation::trigger(
+            'doctrine/orm',
+            'https://github.com/doctrine/deprecations/5555',
+            'this is deprecated %s %d',
+            'foo',
+            1234,
+        );
+    }
 }
