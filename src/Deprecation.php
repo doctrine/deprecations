@@ -10,6 +10,11 @@ use function array_key_exists;
 use function array_reduce;
 use function assert;
 use function debug_backtrace;
+use function dirname;
+use function explode;
+use function ini_get;
+use function is_file;
+use function realpath;
 use function sprintf;
 use function str_replace;
 use function strpos;
@@ -20,6 +25,7 @@ use function trigger_error;
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
 use const DIRECTORY_SEPARATOR;
 use const E_USER_DEPRECATED;
+use const PATH_SEPARATOR;
 
 /**
  * Manages Deprecation logging in different ways.
@@ -63,6 +69,14 @@ class Deprecation
 
     /** @var array<string,bool> */
     private static array $ignoredLinks = [];
+
+    /** @var array<string,string|null> */
+    private static array $composerRoots = [];
+
+    /** @var list<string>|null */
+    private static ?array $openBasedirPaths = null;
+
+    private static bool $openBasedirResolved = false;
 
     private static ?bool $deduplication = null;
 
@@ -135,17 +149,21 @@ class Deprecation
             return;
         }
 
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        // Capture enough frames to detect a test case further up the call stack.
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
 
         // first check that the caller is not from a tests folder, in which case we always let deprecations pass
         if (isset($backtrace[1]['file'], $backtrace[0]['file']) && strpos($backtrace[1]['file'], DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR) === false) {
             $path = DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $package) . DIRECTORY_SEPARATOR;
 
             if (strpos($backtrace[0]['file'], $path) === false) {
-                return;
-            }
-
-            if (strpos($backtrace[1]['file'], $path) !== false) {
+                // The package is the root package. A call from its own tests is
+                // considered an outside call, even when an intermediate frame
+                // belongs to the package source.
+                if (! self::isCalledFromPackageTests($backtrace, $backtrace[0]['file'])) {
+                    return;
+                }
+            } elseif (strpos($backtrace[1]['file'], $path) !== false) {
                 return;
             }
         }
@@ -171,6 +189,119 @@ class Deprecation
         $message = sprintf($message, ...$args);
 
         self::delegateTriggerToBackend($message, $backtrace, $link, $package);
+    }
+
+    /** @param list<array{function: string, line?: int, file?: string, class?: class-string, type?: string, args?: mixed[], object?: object}> $backtrace */
+    private static function isCalledFromPackageTests(array $backtrace, string $file): bool
+    {
+        $root = self::findComposerRoot($file);
+
+        if ($root === null) {
+            return false;
+        }
+
+        $testsPath = $root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR;
+
+        foreach ($backtrace as $index => $frame) {
+            if ($index === 0) {
+                continue;
+            }
+
+            if (isset($frame['file']) && strpos($frame['file'], $testsPath) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Find the root directory of the Composer package that contains the given file. */
+    private static function findComposerRoot(string $file): ?string
+    {
+        $directory = dirname($file);
+
+        if (array_key_exists($directory, self::$composerRoots)) {
+            return self::$composerRoots[$directory];
+        }
+
+        $current = $directory;
+
+        while (true) {
+            if (! self::isWithinOpenBasedir($current)) {
+                break;
+            }
+
+            if (is_file($current . DIRECTORY_SEPARATOR . 'composer.json')) {
+                self::$composerRoots[$directory] = $current;
+
+                return $current;
+            }
+
+            $parent = dirname($current);
+
+            if ($parent === $current) {
+                break;
+            }
+
+            $current = $parent;
+        }
+
+        self::$composerRoots[$directory] = null;
+
+        return null;
+    }
+
+    private static function isWithinOpenBasedir(string $directory): bool
+    {
+        $paths = self::getOpenBasedirPaths();
+
+        if ($paths === null) {
+            return true;
+        }
+
+        $directory .= DIRECTORY_SEPARATOR;
+
+        foreach ($paths as $path) {
+            if (strpos($directory, $path) === 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @return list<string>|null */
+    private static function getOpenBasedirPaths(): ?array
+    {
+        if (self::$openBasedirResolved) {
+            return self::$openBasedirPaths;
+        }
+
+        self::$openBasedirResolved = true;
+
+        $openBasedir = ini_get('open_basedir');
+
+        if ($openBasedir === false || $openBasedir === '') {
+            return self::$openBasedirPaths = null;
+        }
+
+        $paths = [];
+
+        foreach (explode(PATH_SEPARATOR, $openBasedir) as $path) {
+            if ($path === '') {
+                continue;
+            }
+
+            $realPath = realpath($path);
+
+            if ($realPath === false) {
+                continue;
+            }
+
+            $paths[] = $realPath . DIRECTORY_SEPARATOR;
+        }
+
+        return self::$openBasedirPaths = $paths;
     }
 
     /** @param list<array{function: string, line?: int, file?: string, class?: class-string, type?: string, args?: mixed[], object?: object}> $backtrace */
