@@ -15,7 +15,7 @@
         "psr/log": "^1 || ^2 || ^3"
     },
     "conflict": {
-        "phpunit/phpunit": "<=7.5 || >=14"
+        "phpunit/phpunit": "<=7.5 || >=15"
     },
     "suggest": {
         "psr/log": "Allows logging deprecations via PSR-3 logger implementation"
