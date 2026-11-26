@@ -1,8 +1,6 @@
-/.gitattributes export-ignore
-/.github export-ignore
-/.gitignore export-ignore
-/phpcs.xml export-ignore
-/phpunit.xml.dist export-ignore
-/tests export-ignore
-/test_fixtures export-ignore
-/phpstan.neon export-ignore
+/* export-ignore
+/src -export-ignore
+/src/** -export-ignore
+/composer.json -export-ignore
+/LICENSE -export-ignore
+/*.md -export-ignore
